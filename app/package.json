@@ -1,0 +1,13 @@
+{
+  "description": "A demo project with node.js and neo4j.",
+  "version": "0.0.1",
+  "author": "brian.g.markey@gmail.com",
+  "license": "MIT",
+  "private": false,
+  "scripts": {},
+  "dependencies": {
+    "express": "^4.15.2",
+    "neo4j-driver": "^1.4.0",
+    "request": "^2.81.0"
+  }
+}

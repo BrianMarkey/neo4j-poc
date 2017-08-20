@@ -1,0 +1,19 @@
+version: '3'
+services:
+  app:
+    build:
+      context: ./app
+    links:
+     - neo4j
+    ports:
+    - "3000:3000"
+    entrypoint: node ./app/load-data.js && node ./app/app.js
+    container_name: markey_neo4j_app
+  neo4j:
+    build:
+      context: ./db
+    ports:
+    - "7474:7474"
+    - "7687:7687"
+    container_name: markey_neo4j_db
+    #command: /bin/sh -c "/var/lib/neo4j/bin/neo4j start && ls"
