@@ -34,9 +34,9 @@ const fakeDataFactory = require('../src/fake-data-factory.js')();
 
       const result = fakeDataFactory.createRelationships(nodes, settings);
 
-      assert.strictEqual(1, result.ipToDomain.length);
+      assert.strictEqual(1, result.dnsLinks.length);
 
-      result.ipToDomain.forEach((relationship) => {
+      result.dnsLinks.forEach((relationship) => {
         assert.equal('DNS_LINK_TO', relationship.relationshipType);
       });
     });
@@ -72,9 +72,9 @@ const fakeDataFactory = require('../src/fake-data-factory.js')();
 
       const result = fakeDataFactory.createRelationships(nodes, settings);
 
-      assert.strictEqual(1, result.domainToIP.length);
+      assert.strictEqual(1, result.dnsLinks.length);
 
-      result.domainToIP.forEach((relationship) => {
+      result.dnsLinks.forEach((relationship) => {
         assert.strictEqual('DNS_LINK_TO', relationship.relationshipType);
       });
     });

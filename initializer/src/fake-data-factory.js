@@ -1,4 +1,5 @@
 const fs = require('file-system');
+
 module.exports = () => {
   return {
     createData(settings) {
@@ -13,39 +14,27 @@ module.exports = () => {
 
     createRelationships(nodes, settings) {
       const result = {
-        domainToDomain: [],
-        ipToDomain:[],
-        domainToIP: [],
-        ipToIP: []
+        hyperLinks: [],
+        dnsLinks:[]
       };
 
       const allNodes = nodes.ipAddresses.concat(nodes.domains);
       nodes.domains.forEach((thisDomain) => {
         const numberOfHyperlinks = this.getRandomIntFromRange(settings.minHyperlinks, settings.maxHyperlinks);
         const numberOfDNSLinks = this.getRandomIntFromRange(settings.minIPAdressesPerDomain, settings.maxIPAdressesPerDomain);
-        [].push.apply(result.domainToIP, this.creatRelationshipsForNode(thisDomain, nodes.ipAddresses, numberOfDNSLinks, 'DNS_LINK_TO'));
+        [].push.apply(result.dnsLinks, this.creatRelationshipsForNode(thisDomain, nodes.ipAddresses, numberOfDNSLinks, 'DNS_LINK_TO'));
         const hyperLinks = this.creatRelationshipsForNode(thisDomain, allNodes, numberOfHyperlinks, 'HYPERLINK_TO');
         hyperLinks.forEach((hyperLink) => {
-          if (hyperLink.hasOwnProperty('toDomainId')){
-            result.domainToDomain.push(hyperLink);
-          }
-          else {
-            result.domainToIP.push(hyperLink);
-          }
+          result.hyperLinks.push(hyperLink);
         });
       });
       nodes.ipAddresses.forEach((thisIPaddress) => {
         const numberOfDNSLinks = this.getRandomIntFromRange(settings.minDomainsPerIPAddress, settings.maxDomainsPerIPAddress);
         const numberOfHyperlinks = this.getRandomIntFromRange(settings.minHyperlinks, settings.maxHyperlinks);
-        [].push.apply(result.ipToDomain, this.creatRelationshipsForNode(thisIPaddress, nodes.domains, numberOfDNSLinks, 'DNS_LINK_TO'));
+        [].push.apply(result.dnsLinks, this.creatRelationshipsForNode(thisIPaddress, nodes.domains, numberOfDNSLinks, 'DNS_LINK_TO'));
         const hyperLinks = this.creatRelationshipsForNode(thisIPaddress, allNodes, numberOfHyperlinks, 'HYPERLINK_TO');
         hyperLinks.forEach((hyperLink) => {
-          if (hyperLink.hasOwnProperty('toDomainId')){
-            result.ipToDomain.push(hyperLink);
-          }
-          else {
-            result.ipToIP.push(hyperLink);
-          }
+          result.hyperLinks.push(hyperLink);
         });
       });
       return result;
@@ -80,17 +69,13 @@ module.exports = () => {
     },
 
     buildRelationship(fromNode, toNode, relationshipType) {
-      var fromIdPropertyName = fromNode.nodeType === 'DOMAIN' ?
-        'fromDomainId' : 'fromIPAddressId';
-      var toIdPropertyName = toNode.nodeType === 'DOMAIN' ?
-        'toDomainId' : 'toIPAddressId';
-      const link = { 
-        relationshipType: relationshipType
+      return { 
+        relationshipType: relationshipType,
+        fromDomainId: fromNode.nodeType === 'DOMAIN' ? fromNode.id : '',
+        toDomainId: toNode.nodeType === 'DOMAIN' ? toNode.id : '',
+        toIPAddressId: toNode.nodeType === 'IP_ADDRESS' ? toNode.id : '',
+        fromIPAddressId: fromNode.nodeType === 'IP_ADDRESS' ? fromNode.id : ''
       };
-      // TODO maybe dynamic property names here
-      link[fromIdPropertyName] = fromNode.id;
-      link[toIdPropertyName] = toNode.id;
-      return link;
     },
 
     buildDomainNameFromIndex(index)
@@ -104,10 +89,10 @@ module.exports = () => {
     },
 
     buildIpAddressFromIndex(index) {
-      const firstOctet = index >= (255 * 4) ? 255 : Math.max(0, index - 255 * 3);
-      const secondOctet = index >= (255 * 3) ? 255 : Math.max(0, index - 255 * 2);
-      const thirdOctet = index >= (255 * 2) ? 255 : Math.max(0, index - 255)
-      const fourthOctet = index >= 255 ? 255 : index;
+      const firstOctet = this.getRandomIntFromRange(0, 255);
+      const secondOctet = this.getRandomIntFromRange(0, 255);
+      const thirdOctet = this.getRandomIntFromRange(0, 255);
+      const fourthOctet = this.getRandomIntFromRange(0, 255);
       const ipAddressString = `${firstOctet}.${secondOctet}.${thirdOctet}.${fourthOctet}`;
       return {
         id: index,
@@ -134,8 +119,6 @@ module.exports = () => {
       var firstRow = '';
       var columnNames = [];
 
-      console.log(nodes.length);
-
       Object.keys(nodes[0]).forEach((key) => {
         columnNames.push(key);
         firstRow += ',' + key;
@@ -161,13 +144,9 @@ module.exports = () => {
       this.saveFile('ip-addresses.csv', this.createCSVText(data.nodes.ipAddresses));
 
       // IP to IP relationships
-      this.saveFile('ip-to-ip.csv', this.createCSVText(data.relationships.ipToIP));
+      this.saveFile('hyperlinks.csv', this.createCSVText(data.relationships.hyperLinks));
       // Domain to IP relationships
-      this.saveFile('domain-to-ip.csv', this.createCSVText(data.relationships.domainToIP));
-      // IP to domain relationships
-      this.saveFile('ip-to-domain.csv', this.createCSVText(data.relationships.ipToDomain));
-      // Domain to domain relationships
-      this.saveFile('domain-to-domain.csv', this.createCSVText(data.relationships.domainToDomain));
+      this.saveFile('dns-links.csv', this.createCSVText(data.relationships.dnsLinks));
     },
 
     saveFile(fileName, csvString) {

@@ -4,6 +4,7 @@ var request = require('request');
 function start()
 {
   // Change the password
+  // TODO do a makefile command
   request.post({
     headers: {'content-type' : 'application/x-www-form-urlencoded'},
     url: 'http://neo4j:7474/user/neo4j/password',
@@ -19,23 +20,9 @@ function start()
     }
     else {
       // Load the data
-      load();
+      createData();
     }
   });
-}
-
-function load() {
-  createData();
-  // runQuery(`MATCH (n)
-  //           DETACH DELETE n`);
-  // runQuery(`USING PERIODIC COMMIT 500
-  //           LOAD CSV WITH HEADERS FROM "file:///domain-to-domain.csv" AS csvLine
-  //           MATCH (fromDomain:Domain {id: toInt(csvLine.fromDomainId)}),(toDomain:Domain {id: toInt(csvLine.toDomainId)})
-  //           CREATE (fromDomain)-[:HYPERLINK_TO]->(toDomain)`);
-  // runQuery(`LOAD CSV WITH HEADERS FROM "file:///ip-to-domain.csv" AS csvLine
-  //           CREATE (p:Domain { id: toInt(csvLine.id), domainName: csvLine.domainName })`);
-  // runQuery(`LOAD CSV WITH HEADERS FROM "file:///ip-to-ip.csv" AS csvLine
-  //           CREATE (p:Domain { id: toInt(csvLine.id), domainName: csvLine.domainName })`);
 }
 
 function createData() {
@@ -57,10 +44,33 @@ function createIPAdresses(){
 }
 
 function createRelationships(){
-  runQuery(`USING PERIODIC COMMIT 500
-            LOAD CSV WITH HEADERS FROM "file:///domain-to-domain.csv" AS csvLine
-            MATCH (fromDomain:Domain {id: toInt(csvLine.fromDomainId)}),(toDomain:Domain {id: toInt(csvLine.toDomainId)})
-            CREATE (fromDomain)-[:HYPERLINK_TO]->(toDomain)`);
+  const domainToDomain =
+    `USING PERIODIC COMMIT 500
+     LOAD CSV WITH HEADERS FROM "file:///hyperlinks.csv" AS csvLine
+     MATCH (fromNode:Domain {id: toInt(csvLine.fromDomainId)}),(toNode:Domain {id: toInt(csvLine.toDomainId)})
+     CREATE (fromNode)-[:HYPERLINK_TO]->(toNode)`;
+  const domainToIP =
+    `USING PERIODIC COMMIT 500
+     LOAD CSV WITH HEADERS FROM "file:///hyperlinks.csv" AS csvLine
+     MATCH (fromNode:IPAddress {id: toInt(csvLine.fromDomainId)}),(toNode:Domain {id: toInt(csvLine.toIPAddressId)})
+     CREATE (fromNode)-[:HYPERLINK_TO]->(toNode)`;
+  const ipToIP = 
+    `USING PERIODIC COMMIT 500
+     LOAD CSV WITH HEADERS FROM "file:///hyperlinks.csv" AS csvLine
+     MATCH (fromNode:IPAddress {id: toInt(csvLine.fromIPAddressId)}),(toNode:IPAddress {id: toInt(csvLine.toIPAddressId)})
+     CREATE (fromNode)-[:HYPERLINK_TO]->(toNode)`;
+  const ipToDomain =
+    `USING PERIODIC COMMIT 500
+     LOAD CSV WITH HEADERS FROM "file:///hyperlinks.csv" AS csvLine
+     MATCH (fromNode:IPAddress {id: toInt(csvLine.fromIPAddressId)}),(toNode:Domain {id: toInt(csvLine.toDomainId)})
+     CREATE (fromNode)-[:HYPERLINK_TO]->(toNode)`;
+  runQuery(domainToDomain, () => {
+    runQuery(domainToIP, () => {
+      runQuery(ipToIP, () => {
+        runQuery(ipToDomain);
+      });
+    });
+  });
 }
 
 function runQuery (query, next) {
@@ -69,10 +79,7 @@ function runQuery (query, next) {
   session
     .run(query)
     .then((result) => {
-      result.records.forEach((record) => {
-        //console.log(record.get('name'));
-      });
-      console.log('weeeee. loadedddd!');
+      console.log('query completed');
       session.close();
       driver.close();
       if (next) {
