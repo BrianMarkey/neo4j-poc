@@ -6,6 +6,7 @@
   "private": false,
   "scripts": {},
   "dependencies": {
+    "body-parser": "^1.17.2",
     "express": "^4.15.2",
     "neo4j-driver": "^1.4.0",
     "request": "^2.81.0",
