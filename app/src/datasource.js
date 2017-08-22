@@ -12,6 +12,8 @@ module.exports = {
       edges: []
     };
 
+    const nodeIds = {};
+    
     records.forEach((record) => {
       record._fields.forEach((field) => {
         if (field.hasOwnProperty('end')) {
@@ -22,12 +24,15 @@ module.exports = {
           });
         }
         else {
-          result.nodes.push({
-            id: field.identity.low,
-            label: field.labels[0],
-            name: field.properties.ipAddress
-              ||field.properties.domainName
-          });
+          if (!nodeIds[field.identity.low]) {
+            result.nodes.push({
+              id: field.identity.low,
+              label: field.labels[0],
+              name: field.properties.ipAddress
+                ||field.properties.domainName
+            });
+            nodeIds[field.identity.low] = true;
+          }
         }
       });
     });
@@ -82,18 +87,6 @@ module.exports = {
     this.runQuery(query, next);
   },
 
-  getHyperlinks (next) {
-    const query =
-    {
-      cypher: `MATCH (domain1:IPAddress)-[rel]-(domain2:Domain)
-                RETURN domain1, domain2, rel limit 25`,
-      label: `get hyperlinks`,
-      converter: this.convertToGraphJSON
-    };
-
-    this.runQuery(query, next);
-  },
-
   convertToCount(records) {
     if (!Array.isArray(records)) {
       return 0;
@@ -111,7 +104,6 @@ module.exports = {
         console.log(`starting ${query.label} query`);
         const duration = Date.now() - start;
         console.log(`${query.label} query completed in ${duration} ms.`);
-        //console.log(JSON.stringify(result));
         session.close();
         driver.close();
         var convertedResults;

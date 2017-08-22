@@ -6,13 +6,22 @@ module.exports = {
       : requestBody.startNodeType === 'IP_ADDRESS' ? ':IPAddress'
       : '';
     var matchClause = `MATCH (n1${startNodeToken})`;
-    var returnClause = `RETURN n1`;
+    var returnClause = `RETURN DISTINCT n1`;
     for (var i = 0; i < degreesOfSeparation; i++) {
       const nodeName = `n${i + 2}`;
       const relationshipName = `r${i + 1}`;
       matchClause += `-[${relationshipName}:HYPERLINK_TO]-(${nodeName})`;
       returnClause += `,${relationshipName},${nodeName}`;
     }
-    return `${matchClause} ${returnClause} LIMIT ${responseLimit}`;
+    const cypher = `${matchClause} ${returnClause} LIMIT ${responseLimit}`;
+
+    return {
+      cypher,
+      id: '',
+      results: {
+
+      },
+      label: requestBody.label
+    };
   }
 }

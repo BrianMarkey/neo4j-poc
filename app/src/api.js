@@ -3,11 +3,11 @@ const app = express();
 const request = require('request');
 const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
-const datasource = require('./datasource');
 const bodyParser = require('body-parser');
 const queryFactory = require('./query-factory');
 
-module.exports.start = () => {
+module.exports = {
+  start(queryRepository, dataSource) {
     var options = {
       swaggerDefinition: {
         info: {
@@ -40,6 +40,11 @@ module.exports.start = () => {
      *     produces:
      *       - application/json
      *     parameters:
+     *       - label: name
+     *         description: the name of the query
+     *         in: body
+     *         required: true
+     *         type: string
      *       - name: startNodeType
      *         description: The type of node at the start of the hyperlink relationship
      *         in: body
@@ -59,14 +64,18 @@ module.exports.start = () => {
      *         description: Successfully created
      */
     app.post('/hyperlinkQueries', function (req, res) {
+      //TODO validate request.
       const query = queryFactory.buildHyperlinkQuery(req.body);
-      res.send(query);
-      // datasource.getHyperlinks((result) => {
-      //   res.json(result);
-      // });
+      query.converter = dataSource.convertToGraphJSON;
+      dataSource.runQuery(query, (result) => {
+        query.results = result;
+        queryRepository.save(query);
+        res.json(query);
+      });
     });
 
     app.listen(3000, function () {
       console.log('App up on port 3000.');
     });
+  }
 }
