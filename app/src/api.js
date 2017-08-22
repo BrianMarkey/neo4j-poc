@@ -18,7 +18,7 @@ module.exports.start = () => {
         host: 'localhost:3000',
         basePath: '/',
       },
-      apis: [path.join(__dirname, 'app.js')],
+      apis: [path.join(__dirname, 'api.js')],
     };
 
     var swaggerSpec = swaggerJSDoc(options);
@@ -35,7 +35,7 @@ module.exports.start = () => {
      * /api/v1/hyperlinkQueries:
      *   post:
      *     tags:
-     *       - HyperlinkQuerie
+     *       - HyperlinkQuery
      *     description: Creates an observable query of hyperlinks and their related nodes.
      *     produces:
      *       - application/json
