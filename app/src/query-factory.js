@@ -1,5 +1,5 @@
 module.exports = {
-  buildHyperlinkQuery(requestBody) {
+  buildHyperlinkQuery(requestBody, converter) {
     const responseLimit = requestBody.responseLimit || 100;
     const degreesOfSeparation = requestBody.degreesOfSeparation || 3;
     const startNodeToken = requestBody.startNodeType === 'DOMAIN' ? ':Domain'
@@ -21,7 +21,8 @@ module.exports = {
       results: {
 
       },
-      label: requestBody.label
+      label: requestBody.label,
+      converter: converter
     };
   }
 }

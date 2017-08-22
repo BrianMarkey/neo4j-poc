@@ -60,22 +60,26 @@ module.exports = {
      *         required: false
      *         type: string
      *     responses:
-     *       200:
-     *         description: Successfully created
+     *       201:
+     *         description: Successfully created.
+     *       400:
+     *         description: The request body was invalid. The response body will contain the details.
      */
     app.post('/hyperlinkQueries', function (req, res) {
       //TODO validate request.
-      const query = queryFactory.buildHyperlinkQuery(req.body);
-      query.converter = dataSource.convertToGraphJSON;
+      const query = queryFactory.buildHyperlinkQuery(req.body, dataSource.convertToGraphJSON);
       dataSource.runQuery(query, (result) => {
+        // Update the query with the results.
         query.results = result;
+        // Save the query for monitoring.
         queryRepository.save(query);
-        res.json(query);
+        // Return the query.
+        res.status(201).json(query);
       });
     });
 
     app.listen(3000, function () {
-      console.log('App up on port 3000.');
+      console.log('API up on port 3000.');
     });
   }
 }
