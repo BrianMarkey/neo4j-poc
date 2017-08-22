@@ -46,7 +46,7 @@ module.exports = {
      *         required: true
      *         type: string
      *       - name: startNodeType
-     *         description: The type of node at the start of the hyperlink relationship
+     *         description: The type of node at the start of the hyperlink relationship. Valid values HYPERLINK.
      *         in: body
      *         required: false
      *         type: string
@@ -66,20 +66,63 @@ module.exports = {
      *         description: The request body was invalid. The response body will contain the details.
      */
     app.post('/hyperlinkQueries', function (req, res) {
-      //TODO validate request.
-      const query = queryFactory.buildHyperlinkQuery(req.body, dataSource.convertToGraphJSON);
-      dataSource.runQuery(query, (result) => {
-        // Update the query with the results.
-        query.results = result;
-        // Save the query for monitoring.
-        queryRepository.save(query);
-        // Return the query.
-        res.status(201).json(query);
+      // Validate the request.
+      validatePOSTHyperlinkQueryRequest(req, (validationResult) => {
+        if (validationResult.errors.length) {
+          res.status(400).send(validationResult);
+        }
+        else {
+          const query = queryFactory.buildHyperlinkQuery(req.body, dataSource.convertToGraphJSON);
+          dataSource.runQuery(query, (result) => {
+            // Update the query with the results.
+            query.results = result;
+            // Save the query for monitoring.
+            queryRepository.save(query);
+            // Return the query.
+            res.status(201).json(query);
+          });
+        }
       });
     });
 
     app.listen(3000, function () {
       console.log('API up on port 3000.');
     });
+
+    // Probably should use middleware for this.
+    function validatePOSTHyperlinkQueryRequest(req, next){
+      var result = {
+        errors: []
+      };
+      console.log(req.body);
+      if (!req.body || Object.keys(req.body).length === 0) {
+         result.errors.push('A request body in a valid JSON format is required.');
+      }
+      else {
+        if (!req.body.label) {
+          result.errors.push('A label is required');
+        }
+        if (typeof(req.body.startNodeType) !== 'undefined'
+            && req.body.startNodeType !== 'DOMAIN'
+            && req.body.startNodeType !== 'HYPERLINK') {
+          result.errors.push(`Invalid startNodeType: '${req.body.startNodeType}'`);
+        }
+        if (typeof(req.body.degreesOfSeparation) !== 'undefined') {
+          const intValue = parseInt(req.body.degreesOfSeparation);
+          if (!intValue)
+            result.errors.push('degreesOfSeparation must be an int.');
+          else if (intValue > 5 || intValue < 1)
+            result.errors.push('degreesOfSeparation must be between 1 and 5.');
+        }
+        if (typeof(req.body.responseLimit) !== 'undefined') {
+          const intValue = parseInt(req.body.responseLimit);
+          if (!intValue)
+            result.errors.push('responseLimit must be an int.');
+          else if (intValue > 1000 || intValue < 1)
+            result.errors.push('responseLimit must be between 1 and 1000.');
+        }
+      }
+      next(result);
+    }
   }
 }

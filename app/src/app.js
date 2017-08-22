@@ -7,7 +7,7 @@ const bus = new events.EventEmitter();
 const websocketManager = require('./websocket-manager')(8080, bus);
 const sentinel = require('./sentinel')(queryRepository, dataSource, bus);
 
-
+/*
 // start deleting and adding data
 setInterval(() => {
   gremlin.causeTrouble();
@@ -17,6 +17,7 @@ setInterval(() => {
 setInterval(() => {
   sentinel.patrol();
 }, 2000);
+*/
 
 // start the express api
 api.start(queryRepository, dataSource);
