@@ -1,16 +1,18 @@
 // This module polls the db with the saved queries
 // to look for changes and takes the specified action
 // when changes are found.
-module.exports = (queryRepository, dataSource) => {
+module.exports = (queryRepository, dataSource, bus) => {
   return {
-    standGuard() {
+    patrol() {
       queryRepository.queries.forEach((query) => {
         dataSource.runQuery(query, (results) => {
           const start = Date.now();
           const deltas = this.getDeltas(query.results, results);
           const end = Date.now();
-          console.log(`took ${end - start} ms to diff records`);
-          console.log(deltas.removedNodes + deltas.removedEdges + ' removed items');
+          if (deltas) {
+            bus.emit('query_ResultsChanged', deltas);
+            query.results = results;
+          }
         });
       });
     },
@@ -18,11 +20,16 @@ module.exports = (queryRepository, dataSource) => {
       const nodesResult = this.getArrayDiff(oldSet.nodes, newSet.nodes);
       const edgesResult = this.getArrayDiff(oldSet.edges, newSet.edges);
 
+      if(nodesResult.added.length 
+        + nodesResult.removed.length
+        + edgesResult.added.length
+        + edgesResult.removed.length === 0) return;
+
       return {
         addedNodes: nodesResult.added,
         removedNodes: nodesResult.removed,
         addedEdges: edgesResult.added,
-        removedEdges: edgesResult.removed,
+        removedEdges: edgesResult.removed
       }
     },
     getHash(data){
