@@ -4,7 +4,9 @@ const queryRepository = require('./query-repository');
 const dataSource = require('./datasource');
 const events = require('events'); 
 const bus = new events.EventEmitter();
+const websocketManager = require('./websocket-manager')(8080, bus);
 const sentinel = require('./sentinel')(queryRepository, dataSource, bus);
+
 
 // start deleting and adding data
 setInterval(() => {

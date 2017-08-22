@@ -10,8 +10,9 @@ module.exports = (queryRepository, dataSource, bus) => {
           const deltas = this.getDeltas(query.results, results);
           const end = Date.now();
           if (deltas) {
-            bus.emit('query_ResultsChanged', deltas);
+            bus.emit('query_ResultsChanged', query.id, deltas);
             query.results = results;
+            console.log('found deltas');
           }
         });
       });
