@@ -10,7 +10,11 @@ module.exports = {
     setTimeout(() => {
       this.queryRepository.queries.forEach((query) => {
         this.dataSource.runQuery(query, (results) => {
-          
+          const start = Date.now();
+          const deltas = this.getDeltas(query.results, results);
+          const end = Date.now();
+          console.log(`took ${end - start} ms to diff records`);
+          console.log(deltas.removedNodes + deltas.removedEdges + ' removed items');
         });
       });
       this.patrol();

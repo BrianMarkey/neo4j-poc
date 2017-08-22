@@ -13,7 +13,7 @@ module.exports = {
     };
 
     const nodeIds = {};
-    
+
     records.forEach((record) => {
       record._fields.forEach((field) => {
         if (field.hasOwnProperty('end')) {
@@ -79,6 +79,7 @@ module.exports = {
     {
       cypher: `MATCH (n)
        WITH n, rand() AS number
+       ORDER by number
        LIMIT ${count}
        DETACH DELETE n`,
       label: `delete ${count} random nodes`

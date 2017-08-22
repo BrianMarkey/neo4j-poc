@@ -4,8 +4,8 @@ const dataFactory = require('./data-factory');
 module.exports = {
   causeTrouble() {
     setTimeout(() => {
-      this.deleteRandomEdges(.005, () => { 
-        this.deleteRandomNodes(.005)
+      this.deleteRandomEdges(.001, () => { 
+        this.deleteRandomNodes(.001)
       });
       this.causeTrouble();
     }, 5000);
