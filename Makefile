@@ -1,5 +1,7 @@
 build:
-	docker stop markey_neo4j_db
-	docker stop markey_neo4j_app
-	docker rm markey_neo4j_db
+	-docker rm markey_neo4j_db
+	node initializer/create-data
 	docker-compose up --build
+
+run:
+	docker-compose up

@@ -7,8 +7,8 @@ services:
      - neo4j
     ports:
     - "3000:3000"
-    #entrypoint: node ./app/load-data.js && node ./app/app.js
-    entrypoint: node ./app/load-data.js
+    entrypoint: node ./app/load-data.js && node ./app/app.js
+    #entrypoint: node ./app/load-data.js
     container_name: markey_neo4j_app
   neo4j:
     build:
