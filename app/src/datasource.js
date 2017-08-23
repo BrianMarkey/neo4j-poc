@@ -1,5 +1,5 @@
-
 const neo4j = require('neo4j-driver').v1;
+
 module.exports = {
   convertToGraphJSON(records) {
     if (!Array.isArray(records)) {
