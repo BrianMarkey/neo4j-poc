@@ -95,6 +95,10 @@ module.exports = {
     return records[0]._fields[0].low;
   },
 
+  runTransaction () {
+
+  },
+
   runQuery (query, next) {
     const driver = neo4j.driver("bolt://localhost", neo4j.auth.basic("neo4j", "smough"));
     const session = driver.session();
