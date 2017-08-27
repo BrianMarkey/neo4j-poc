@@ -100,7 +100,7 @@ module.exports = {
   },
 
   runQuery (query, next) {
-    const driver = neo4j.driver("bolt://localhost", neo4j.auth.basic("neo4j", "smough"));
+    const driver = neo4j.driver("bolt://neo4j", neo4j.auth.basic("neo4j", "smough"));
     const session = driver.session();
     const start = Date.now();
     session

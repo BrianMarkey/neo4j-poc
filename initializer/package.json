@@ -1,11 +1,14 @@
 {
-  "description": "Create csv files ready to import in to ne04j..",
+  "name": "initializer",
+  "description": "Create csv files ready to import in to ne04j.",
   "version": "0.0.1",
   "author": "brian.g.markey@gmail.com",
   "license": "MIT",
   "private": false,
   "scripts": {},
   "dependencies": {
-    "file-system": "^2.2.2"
+    "file-system": "^2.2.2",
+    "neo4j-driver": "^1.4.0",
+    "request": "^2.81.0"
   }
 }

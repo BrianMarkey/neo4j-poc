@@ -1,6 +1,5 @@
 const express = require('express');
 const app = express();
-const request = require('request');
 const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
 const bodyParser = require('body-parser');
