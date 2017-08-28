@@ -10,7 +10,6 @@ module.exports = (queryRepository, dataSource, bus) => {
           if (deltas) {
             bus.emit('query_ResultsChanged', query.id, deltas);
             query.results = results;
-            console.log('found deltas');
           }
         });
       });

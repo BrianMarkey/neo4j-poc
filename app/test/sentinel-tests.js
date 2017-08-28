@@ -1,23 +1,115 @@
 const queryFactory = require('../src/query-factory.js');
-const sentinel = require('../src/sentinel.js')();
+const sentinel = require('../src/sentinel.js');
 const assert = require('assert');
 
  describe('sentinel', function() {
+  describe('#patrol()', function() {
+    it('should emit an event with the correct data when deltas are found.', function() {
+      // Arrange
+      var eventNameResult = '';
+      var idResult = '';
+      var deltasResult = { };
+      const bus = {
+        emit (name, id, deltas) {
+          eventNameResult = name;
+          idResult = id;
+          deltasResult  = deltas;
+        }
+      }
+
+      const queryRepository = {
+        queries: [{
+          id: '1',
+          results: {
+            nodes: [ { id: 1 }, { id: 2 }, { id: 3 } ],
+            edges: [ { id: 1 }, { id: 2 }, { id: 3 } ]
+          },
+        }]
+      };
+
+      const dataSource = {
+        runQuery(query, next) {
+          if (query.id === '1') {
+            next({
+              nodes: [ { id: 1 }, { id: 2 }, { id: 3 } ],
+              edges: [ { id: 1 }, { id: 2 } ]
+            });
+          }
+        }
+      };
+
+      const testSentinel = sentinel(queryRepository, dataSource, bus);
+
+      // Act
+      const result = testSentinel.patrol();
+
+      // Assert
+      assert.strictEqual(eventNameResult, 'query_ResultsChanged');
+      assert.strictEqual(1, deltasResult.removedEdges.length);
+      assert.strictEqual('1', idResult);
+    });
+    
+    it('should not emit an event when no deltas are found.', function() {
+      // Arrange
+      var eventNameResult = '';
+      var idResult = '';
+      var deltasResult = { };
+      const bus = {
+        emit (name, id, deltas) {
+          eventNameResult = name;
+          idResult = id;
+          deltasResult  = deltas;
+        }
+      }
+
+      const queryRepository = {
+        queries: [{
+          id: '1',
+          results: {
+            nodes: [ { id: 1 }, { id: 2 }, { id: 3 } ],
+            edges: [ { id: 1 }, { id: 2 }, { id: 3 } ]
+          },
+        }]
+      };
+
+      const dataSource = {
+        runQuery(query, next) {
+          if (query.id === '1') {
+            next({
+              nodes: [ { id: 1 }, { id: 2 }, { id: 3 } ],
+              edges: [ { id: 1 }, { id: 2 }, { id: 3 } ]
+            });
+          }
+        }
+      };
+      
+      const testSentinel = sentinel(queryRepository, dataSource, bus);
+
+      // Act
+      const result = testSentinel.patrol();
+
+      // Assert
+      assert.strictEqual(eventNameResult, '');
+    });
+  });
+
   describe('#getArrayDiff()', function() {
+    const testSentinel = sentinel();
     it('should detect additions.', function() {
       const oldSet = [ { id: 1 }, { id: 2 }, { id: 3 } ];
       const newSet = [ { id: 1 }, { id: 2 }, { id: 3 }, { id: 5 } ];
-      const result = sentinel.getArrayDiff(oldSet, newSet);
+      const result = testSentinel.getArrayDiff(oldSet, newSet);
       assert.strictEqual(5, result.added[0].id);
     });
     it('should detect removal.', function() {
       const oldSet = [ { id: 1 }, { id: 2 }, { id: 3 } ];
       const newSet = [ { id: 1 }, { id: 2 } ];
-      const result = sentinel.getArrayDiff(oldSet, newSet);
+      const result = testSentinel.getArrayDiff(oldSet, newSet);
       assert.strictEqual(3, result.removed[0].id);
     });
   });
   describe('#getDeltas()', function() {
+    const testSentinel = sentinel();
     it('should detect the addition of nodes.', function() {
       const old = {
         nodes: [ { id: 1 }, { id: 2 }, { id: 3 } ],
@@ -27,7 +119,7 @@ const assert = require('assert');
         nodes: [ { id: 1 }, { id: 3 }, { id: 5 } ],
         edges: [ { id: 1 }, { id: 3 }, { id: 5 } ]
       };
-      const result = sentinel.getDeltas(old, niew);
+      const result = testSentinel.getDeltas(old, niew);
       assert.strictEqual(5, result.addedNodes[0].id);
     });
     it('should detect the removal of nodes.', function() {
@@ -39,7 +131,7 @@ const assert = require('assert');
         nodes: [ { id: 1 }, { id: 3 }, { id: 5 } ],
         edges: [ { id: 1 }, { id: 3 }, { id: 5 } ]
       };
-      const result = sentinel.getDeltas(old, niew);
+      const result = testSentinel.getDeltas(old, niew);
       assert.strictEqual(2, result.removedNodes[0].id);
     });
     
@@ -52,7 +144,7 @@ const assert = require('assert');
         nodes: [ { id: 1 }, { id: 3 }, { id: 5 } ],
         edges: [ { id: 1 }, { id: 3 }, { id: 5 } ]
       };
-      const result = sentinel.getDeltas(old, niew);
+      const result = testSentinel.getDeltas(old, niew);
       assert.strictEqual(5, result.addedEdges[0].id);
     });
     it('should detect the removal of edges.', function() {
@@ -64,7 +156,7 @@ const assert = require('assert');
         nodes: [ { id: 1 }, { id: 3 }, { id: 5 } ],
         edges: [ { id: 1 }, { id: 3 }, { id: 5 } ]
       };
-      const result = sentinel.getDeltas(old, niew);
+      const result = testSentinel.getDeltas(old, niew);
       assert.strictEqual(2, result.removedEdges[0].id);
     });
   });
