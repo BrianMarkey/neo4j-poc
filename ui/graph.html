@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+</head>
+<body>
+
+</body>
+
+  <script>
+    // console.log('okay');
+    // const width = 640,
+    //       height = 480;
+
+    // var svg = d3.select('body').append('svg')
+    //   .attr('width', width)
+    //   .attr('height', height);
+
+    // var force = d3.layout.force()
+    // .size([width, height])
+    // .nodes(d3.values(nodes))
+    // .links(links)
+    // .on('tick', tick)
+    // .linkDistance(300)
+    // .start();
+
+    // var link = svg.selectAll('.link')
+    // .data(links)
+    // .enter()
+    // .append('line')
+    // .attr('class', 'link');
+
+    // var node = svg.selectAll('.node')
+    // .data(force.nodes())
+    // .enter().append('circle')
+    // .attr('class', 'node')
+    // .attr('r', width * 0.03);
+
+    // function tick(e){
+      
+    // }s
+    const socket = new WebSocket('ws://localhost:8080');
+    socket.onopen = function (event) {
+      exampleSocket.send('socket is open'); 
+    };
+  </script>
+</html>
