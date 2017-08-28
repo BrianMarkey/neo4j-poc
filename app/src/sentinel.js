@@ -6,9 +6,7 @@ module.exports = (queryRepository, dataSource, bus) => {
     patrol() {
       queryRepository.queries.forEach((query) => {
         dataSource.runQuery(query, (results) => {
-          const start = Date.now();
           const deltas = this.getDeltas(query.results, results);
-          const end = Date.now();
           if (deltas) {
             bus.emit('query_ResultsChanged', query.id, deltas);
             query.results = results;

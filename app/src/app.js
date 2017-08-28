@@ -1,7 +1,7 @@
 const api = require('./api');
-const gremlin = require('./gremlin');
 const queryRepository = require('./query-repository');
 const dataSource = require('./datasource');
+const gremlin = require('./gremlin')(dataSource);
 const events = require('events'); 
 const bus = new events.EventEmitter();
 const websocketManager = require('./websocket-manager')(8080, bus);

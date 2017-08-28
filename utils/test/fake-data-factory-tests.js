@@ -1,6 +1,6 @@
 
 const assert = require('assert');
-const fakeDataFactory = require('./fake-data-factory.js')();
+const fakeDataFactory = require('../src/fake-data-factory.js')();
 
  describe('fakeDataFactory', function() {
   describe('#createRelationships()', function() {

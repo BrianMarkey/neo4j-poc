@@ -6,3 +6,6 @@ build:
 
 run:
 	docker-compose up
+
+test:
+	mocha "./*/test/*.js"
