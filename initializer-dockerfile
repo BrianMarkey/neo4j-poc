@@ -1,0 +1,5 @@
+FROM node:8.4
+COPY ./initializer/src /initializer
+COPY ./initializer/package.json ./
+COPY ./utils/src /utils
+RUN npm install

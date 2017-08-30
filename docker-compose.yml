@@ -18,3 +18,17 @@ services:
     - "7474:7474"
     - "7687:7687"
     container_name: markey_neo4j_db
+    volumes:
+      - import-data:/var/lib/neo4j/import/data
+    depends_on:
+    - initializer
+  initializer:
+    build:
+      context: ./
+      dockerfile: initializer-dockerfile
+    container_name: markey_neo4j_initializer
+    volumes:
+      - import-data:/import-data
+    entrypoint: node /initializer/create-data.js
+volumes:
+  import-data:
