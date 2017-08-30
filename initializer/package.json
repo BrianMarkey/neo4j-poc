@@ -7,8 +7,6 @@
   "private": false,
   "scripts": {},
   "dependencies": {
-    "file-system": "^2.2.2",
-    "neo4j-driver": "^1.4.0",
-    "request": "^2.81.0"
+    "file-system": "^2.2.2"
   }
 }
