@@ -2,7 +2,8 @@ version: '3'
 services:
   app:
     build:
-      context: ./app
+      context: ./
+      dockerfile: app-dockerfile
     links:
      - neo4j
     ports:
@@ -11,7 +12,8 @@ services:
     container_name: markey_neo4j_app
   neo4j:
     build:
-      context: ./db
+      context: ./
+      dockerfile: db-dockerfile
     ports:
     - "7474:7474"
     - "7687:7687"

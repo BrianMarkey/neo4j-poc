@@ -1,0 +1,3 @@
+FROM neo4j:3.2.3
+COPY ./db/import ./import
+ENV NEO4J_AUTH=neo4j/123456

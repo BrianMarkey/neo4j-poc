@@ -1,5 +1,6 @@
 const api = require('./api');
 const queryRepository = require('./query-repository');
+const fakeDataFactory = require('../utils/fake-data-factory')();
 const dataSource = require('./datasource');
 const gremlin = require('./gremlin')(dataSource);
 const events = require('events'); 

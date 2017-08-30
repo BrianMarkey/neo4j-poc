@@ -6,7 +6,5 @@
   "private": false,
   "scripts": {},
   "dependencies": {
-    "file-system": "^2.2.2",
-    "neo4j-driver": "^1.4.0"
   }
 }
