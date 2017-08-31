@@ -1,4 +1,4 @@
-const fakeDataFactory = require('../utils/fake-data-factory.js')();
+const fakeDataFactory = require('../../utils/src/fake-data-factory.js')();
 const fs = require('file-system');
 
 const settings = {

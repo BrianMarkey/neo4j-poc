@@ -1,5 +1,5 @@
 FROM node:8.4
-COPY ./initializer/src /initializer
-COPY ./initializer/package.json ./
-COPY ./utils/src /utils
-RUN npm install
+COPY ./initializer/src /initializer/src
+COPY ./initializer/package.json /initializer
+COPY ./utils/src /utils/src
+RUN npm install --prefix /initializer

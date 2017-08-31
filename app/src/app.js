@@ -2,7 +2,7 @@ module.exports = (dbHostName) => {
   dbHostName = dbHostName || 'neo4j';
   const api = require('./api');
   const queryRepository = require('./query-repository');
-  //const fakeDataFactory = require('../utils/fake-data-factory')();
+  const fakeDataFactory = require('../../utils/src/fake-data-factory')();
   const dataSource = require('./datasource')(dbHostName);
   const gremlin = require('./gremlin')(dataSource);
   const events = require('events'); 
