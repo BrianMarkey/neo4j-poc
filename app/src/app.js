@@ -3,7 +3,7 @@ module.exports = (dbHostName) => {
   const api = require('./api');
   const queryRepository = require('./query-repository');
   const fakeDataFactory = require('../../utils/src/fake-data-factory')();
-  const dataSource = require('./datasource')(dbHostName);
+  const dataSource = require('./datasource')(dbHostName, fakeDataFactory);
   const gremlin = require('./gremlin')(dataSource);
   const events = require('events'); 
   const bus = new events.EventEmitter();

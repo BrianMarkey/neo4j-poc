@@ -89,6 +89,10 @@ module.exports = (dbHostName) => {
       this.runQuery(query, next);
     },
 
+    insertNodes (nodesToInsert) {
+      
+    },
+
     convertToCount(records) {
       if (!Array.isArray(records)) {
         return 0;

@@ -1,9 +1,8 @@
 // The purpose of this module is to randomly add and delete data.
-const dataFactory = require('./data-factory');
-
-module.exports = (dataSource) => {
+module.exports = (dataSource, fakeDataFactory) => {
   return {
     causeTrouble() {
+      //this.addRandomData();
       this.deleteRandomEdges(.001, () => { 
         this.deleteRandomNodes(.001, () => {
         });
@@ -27,11 +26,18 @@ module.exports = (dataSource) => {
     addRandomData() {
       // create random nodes
       // randomly link them to eachother and other db nodes
+      dataSource.getNodesCount((result) => {
+        const numberToAdd = Math.floor(result * percentToDelete);
+        const numberOfIPs = fakeDataFactory.getRandomIntFromRange(0, numberToAdd);
+        const numberOfDomains = numberToAdd - numberOfIPs;
+        const nodesToAdd = fakeDataFactory.createNodes(numberOfIPs, numberOfDomains);
+        // insert the nodes
+      });
       const query = {
         label: 'get all nodes',
         cypher: 'match (n) return n'
       }
-      dataSource.runQuery('match (n) return n');
+      dataSource.runQuery(query);
     }
   }
 }
