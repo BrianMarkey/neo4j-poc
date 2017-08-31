@@ -1,11 +1,19 @@
 build:
 	-docker rm markey_neo4j_db
-	docker-compose up -d --build
-	docker exec -it markey_neo4j_db import/wait-for-it.sh localhost:7474 -- /var/lib/neo4j/import/do-import.sh
+	-docker rm markey_neo4j_initializer
+	-docker rm markey_neo4j_app
+	docker volume create neo4jcodetest_import-data
+	docker build . --file ./db-dockerfile -t markey_neo4j_db --no-cache
+	docker build . --file ./initializer-dockerfile -t markey_neo4j_initializer --no-cache
+	docker build . --file ./app-dockerfile -t markey_neo4j_app --no-cache
+	docker run -d -v neo4jcodetest_import-data:/initializer/data-to-import markey_neo4j_initializer node /initializer/create-data
+	docker run -d -p 7474:7474 -p 7687:7687 --name markey_neo4j_db -v neo4jcodetest_import-data:/var/lib/neo4j/import/data markey_neo4j_db
+	docker exec -i -t markey_neo4j_db /bin/sh -c "import/wait-for-it.sh localhost:7474 -- /var/lib/neo4j/import/do-import.sh"
+	docker stop markey_neo4j_db
 
 run:
-	docker-compose up
+#	docker start markey_neo4j_db
+#	docker run -i -t markey_neo4j_app
 
 test:
 	mocha "./*/test/*.js"
-	

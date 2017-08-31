@@ -1,34 +1,32 @@
 version: '3'
 services:
-  app:
-    build:
-      context: ./
-      dockerfile: app-dockerfile
-    links:
-     - neo4j
-    ports:
-    - "3000:3000"
-    entrypoint: node ./app/app.js
-    container_name: markey_neo4j_app
-  neo4j:
-    build:
-      context: ./
-      dockerfile: db-dockerfile
-    ports:
-    - "7474:7474"
-    - "7687:7687"
-    container_name: markey_neo4j_db
-    volumes:
-      - import-data:/var/lib/neo4j/import/data
-    depends_on:
-    - initializer
-  initializer:
-    build:
-      context: ./
-      dockerfile: initializer-dockerfile
-    container_name: markey_neo4j_initializer
-    volumes:
-      - import-data:/import-data
-    entrypoint: node /initializer/create-data.js
-volumes:
-  import-data:
+  # app:
+  #   build:
+  #     context: ./
+  #     dockerfile: app-dockerfile
+  #   links:
+  #    - neo4j
+  #   ports:
+  #   - "3000:3000"
+  #   entrypoint: node ./app/app.js
+  #   container_name: markey_neo4j_app
+  # neo4j:
+  #   build:
+  #     context: ./
+  #     dockerfile: db-dockerfile
+  #   ports:
+  #   - "7474:7474"
+  #   - "7687:7687"
+  #   container_name: markey_neo4j_db
+  #   volumes:
+  #     - import-data:/var/lib/neo4j/import/data
+  # initializer:
+  #   build:
+  #     context: ./
+  #     dockerfile: initializer-dockerfile
+  #   container_name: markey_neo4j_initializer
+  #   volumes:
+  #     - import-data:/import-data
+  #   entrypoint: node /initializer/create-data.js
+# volumes:
+#   import-data:

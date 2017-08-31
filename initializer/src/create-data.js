@@ -14,11 +14,11 @@ const settings = {
 const data = fakeDataFactory.createData(settings);
 
 // Domains
-fs.writeFileSync('/import-data/domains.csv', fakeDataFactory.createCSVText(data.nodes.domains));
+fs.writeFileSync('/initializer/data-to-import/domains.csv', fakeDataFactory.createCSVText(data.nodes.domains));
 // IP addresses
-fs.writeFileSync('/import-data/ip-addresses.csv', fakeDataFactory.createCSVText(data.nodes.ipAddresses));
+fs.writeFileSync('/initializer/data-to-import/ip-addresses.csv', fakeDataFactory.createCSVText(data.nodes.ipAddresses));
 
 // IP to IP relationships
-fs.writeFileSync('/import-data/hyperlinks.csv', fakeDataFactory.createCSVText(data.relationships.hyperLinks));
+fs.writeFileSync('/initializer/data-to-import/hyperlinks.csv', fakeDataFactory.createCSVText(data.relationships.hyperLinks));
 // Domain to IP relationships
-fs.writeFileSync('/import-data/dns-links.csv', fakeDataFactory.createCSVText(data.relationships.dnsLinks));
+fs.writeFileSync('/initializer/data-to-import/dns-links.csv', fakeDataFactory.createCSVText(data.relationships.dnsLinks));
