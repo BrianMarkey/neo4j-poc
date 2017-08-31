@@ -1,5 +1,11 @@
+const fs = require('fs');
+const path = require('path');
+const wordlist = JSON.parse(fs.readFileSync(path.join(__dirname, 'words.json')));
+
 module.exports = () => {
   return {
+    wordlist: wordlist.top100EnglishWords,
+
     createData(settings) {
       const numberOfIps = settings.totalNodes / 2
       const numberOfDomains = settings.totalNodes - numberOfIps;
@@ -59,7 +65,7 @@ module.exports = () => {
         result.ipAddresses.push(ipAddress);
       }
       for (var i = 0; i < numberOfDomains; i++) {
-        const domainName = this.buildDomainNameFromIndex(i)
+        const domainName = this.buildDomainName(i)
         result.domains.push(domainName);
       }
 
@@ -76,11 +82,14 @@ module.exports = () => {
       };
     },
 
-    buildDomainNameFromIndex(index)
+    buildDomainName(tempId)
     {
-      var name = index + 1 + '.com';
+      const segment1 = this.wordlist[this.getRandomIntFromRange(0, this.wordlist.length -1)];
+      const segment2 = this.wordlist[this.getRandomIntFromRange(0, this.wordlist.length -1)];
+      const segment3 = this.wordlist[this.getRandomIntFromRange(0, this.wordlist.length -1)];
+      var name = `${segment1}.${segment2}.${segment3}.com`;
       return {
-        id: index,
+        id: tempId,
         nodeType: 'DOMAIN',
         domainName: name
       };
