@@ -89,8 +89,9 @@ module.exports = (dbHostName) => {
       this.runQuery(query, next);
     },
 
-    insertNodes (nodesToInsert) {
-      
+    insertDomains (domainsToInsert) {
+      `MERGE (domain:Domain { domainName: domain.domainName })
+       RETURN person.name, person.bornIn, city`
     },
 
     convertToCount(records) {
@@ -109,7 +110,7 @@ module.exports = (dbHostName) => {
       const session = driver.session();
       const start = Date.now();
       session
-        .run(query.cypher)
+        .run(query.cypher, query.params)
         .then((result) => {
           console.log(`starting ${query.label} query`);
           const duration = Date.now() - start;
@@ -118,7 +119,7 @@ module.exports = (dbHostName) => {
           driver.close();
           var convertedResults;
           if (query.converter) {
-          convertedResults = query.converter(result.records);
+            convertedResults = query.converter(result.records);
           }
           if (next) {
             next(convertedResults);
