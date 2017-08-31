@@ -7,6 +7,5 @@
   "private": false,
   "scripts": {},
   "dependencies": {
-    "file-system": "^2.2.2"
   }
 }

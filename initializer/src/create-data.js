@@ -1,5 +1,5 @@
 const fakeDataFactory = require('../../utils/src/fake-data-factory.js')();
-const fs = require('file-system');
+const fs = require('fs');
 
 const settings = {
   totalNodes: 100000,
@@ -14,8 +14,10 @@ const settings = {
 const data = fakeDataFactory.createData(settings);
 
 // Domains
+console.log('writing domains file...');
 fs.writeFileSync('/initializer/data-to-import/domains.csv', fakeDataFactory.createCSVText(data.nodes.domains));
 // IP addresses
+console.log('writing ip addresses file...');
 fs.writeFileSync('/initializer/data-to-import/ip-addresses.csv', fakeDataFactory.createCSVText(data.nodes.ipAddresses));
 
 // IP to IP relationships
