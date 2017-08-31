@@ -12,8 +12,8 @@ build:
 	docker stop markey_neo4j_db
 
 run:
-#	docker start markey_neo4j_db
-#	docker run -i -t markey_neo4j_app
+	docker start markey_neo4j_db
+	docker run -it -p 3000:3000 -p 8080:8080 --link=markey_neo4j_db:neo4j markey_neo4j_app node app/app.js
 
 test:
 	mocha "./*/test/*.js"
