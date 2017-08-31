@@ -13,7 +13,11 @@ build:
 
 run:
 	docker start markey_neo4j_db
-	docker run -it -p 3000:3000 -p 8080:8080 --link=markey_neo4j_db:neo4j markey_neo4j_app node app/app.js
+	docker run -it -p 3000:3000 -p 8080:8080 --link=markey_neo4j_db:neo4j markey_neo4j_app node -e 'require("/app/app.js")("neo4j")'
+
+run-dev:
+	docker start markey_neo4j_db
+	node -e 'require("./app/src/app")("localhost")'
 
 test:
 	mocha "./*/test/*.js"

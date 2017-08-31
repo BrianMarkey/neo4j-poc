@@ -5,7 +5,8 @@ module.exports = (dataSource) => {
   return {
     causeTrouble() {
       this.deleteRandomEdges(.001, () => { 
-        this.deleteRandomNodes(.001)
+        this.deleteRandomNodes(.001, () => {
+        });
       });
     },
 
@@ -24,7 +25,13 @@ module.exports = (dataSource) => {
     },
 
     addRandomData() {
-
+      // create random nodes
+      // randomly link them to eachother and other db nodes
+      const query = {
+        label: 'get all nodes',
+        cypher: 'match (n) return n'
+      }
+      dataSource.runQuery('match (n) return n');
     }
   }
 }
