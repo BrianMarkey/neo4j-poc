@@ -65,7 +65,7 @@ module.exports = () => {
         result.ipAddresses.push(ipAddress);
       }
       for (var i = 0; i < numberOfDomains; i++) {
-        const domainName = this.buildDomainName(i)
+        const domainName = this.buildDomainName(i);
         result.domains.push(domainName);
       }
 
