@@ -32,18 +32,30 @@ module.exports = (dataSource, fakeDataFactory) => {
         const numberToAdd = Math.floor(result * percentToAdd);
         const numberOfIPs = fakeDataFactory.getRandomIntFromRange(0, numberToAdd);
         const numberOfDomains = numberToAdd - numberOfIPs;
-        console.log(numberToAdd);
         const nodesToAdd = fakeDataFactory.createNodes(numberOfIPs, numberOfDomains);
         // insert the nodes
         const ipAddressesPromise = dataSource.insertIPAddresses(nodesToAdd.ipAddresses);
         const domainsPromise = dataSource.insertDomains(nodesToAdd.domains);
         // wait for both results
-        Promise.all([ipAddressesPromise, domainsPromise]).then(results => {
-          console.log(results[0].concat(results[1]));
-          // get all nodes
-          // loop through the results ids
-          // build up relationships
-          // insert relationships
+        Promise.all([ipAddressesPromise, domainsPromise]).then(createNodesResult => {
+          const createdNodes = createNodesResult[0].concat(createNodesResult[1]);
+          const getAllNodesPromise = dataSource.getAllNodes();
+          //get all nodes
+          getAllNodesPromise.then((allNodes) => {
+            var newRelationships = [];
+            // loop through the results ids
+            createdNodes.forEach((node) => {
+              // build up relationships
+              const numberOfRelationships = fakeDataFactory.getRandomIntFromRange(0, 10);
+              newRelationships = newRelationships.concat(
+                fakeDataFactory.creatRelationshipsForNode(node, allNodes, numberOfRelationships, 'HYPERLINK_TO')
+              );
+            });
+            console.log(newRelationships.slice(0,10));
+            // insert relationships
+          }, (err) => {
+            console.log(err);
+          });
         });
       });
     }

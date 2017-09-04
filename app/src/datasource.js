@@ -95,10 +95,10 @@ module.exports = (dbHostName) => {
         {
           cypher: `UNWIND $domainsParam as domain
                   CREATE (d:Domain { domainName: domain.domainName })
-                  RETURN { id: ID(d) }`,
+                  RETURN d`,
           label: `insert ${domainsToInsert.length} domains`,
           params: { domainsParam: domainsToInsert },
-          converter: this.convertToIds
+          converter: this.convertToNodes
         };
         this.runQuery(query, (convertedResults) => {
           resolve(convertedResults);
@@ -112,10 +112,24 @@ module.exports = (dbHostName) => {
         {
           cypher: `UNWIND $ipsParam as ip
                   CREATE (i:IPAddress { ipAddress: ip.ipAddress })
-                  RETURN { id: ID(i) }`,
+                  RETURN i`,
           label: `insert ${ipAddressesToInsert.length} IPAddresses`,
           params: { ipsParam: ipAddressesToInsert },
-          converter: this.convertToIds
+          converter: this.convertToNodes
+        };
+        this.runQuery(query, (convertedResults) => {
+          resolve(convertedResults);
+        });
+      });
+    },
+
+    getAllNodes() {
+      return new Promise((resolve, reject) => {
+        const query = 
+        {
+          cypher: `MATCH (n) RETURN n`,
+          label: `get all nodes`,
+          converter: this.convertToNodes
         };
         this.runQuery(query, (convertedResults) => {
           resolve(convertedResults);
@@ -136,7 +150,32 @@ module.exports = (dbHostName) => {
       }
       const results = [];
       records.forEach((record) => {
-        results.push(record._fields[0].id.low);
+        results.push(record);
+        //results.push(record._fields[0].id.low);
+      });
+      return results;
+    },
+    
+    convertToNodes(records) {
+      if (!Array.isArray(records)) {
+        return [];
+      }
+      const results = [];
+      records.forEach((record) => {
+        const fields = record._fields[0];
+        const properties = fields.properties;
+        const node = {
+          id: fields.identity.low
+        };
+        if (properties.domainName) {
+          node.domainName = properties.domainName;
+          node.nodeType = 'DOMAIN';
+        }
+        else {
+          node.ipAddress = properties.ipAddress;
+          node.nodeType = 'IP_ADDRESS';
+        }
+        results.push(node);
       });
       return results;
     },
