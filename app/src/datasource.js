@@ -94,7 +94,7 @@ module.exports = (dbHostName) => {
         const query = 
         {
           cypher: `UNWIND $domainsParam as domain
-                  CREATE (d:Domain { domainName: domain.domainName })
+                  CREATE (d:Domain { domainName: domain.domainName, nodeId: domain.nodeId })
                   RETURN d`,
           label: `insert ${domainsToInsert.length} domains`,
           params: { domainsParam: domainsToInsert },
@@ -111,7 +111,7 @@ module.exports = (dbHostName) => {
         const query = 
         {
           cypher: `UNWIND $ipsParam as ip
-                  CREATE (i:IPAddress { ipAddress: ip.ipAddress })
+                  CREATE (i:IPAddress { ipAddress: ip.ipAddress, nodeId: ip.nodeId })
                   RETURN i`,
           label: `insert ${ipAddressesToInsert.length} IPAddresses`,
           params: { ipsParam: ipAddressesToInsert },
@@ -131,11 +131,12 @@ module.exports = (dbHostName) => {
     }
     */
     insertHyperlinks (hyperlinksToInsert) {
+      console.log(hyperlinksToInsert.slice(0,10));
       return new Promise((resolve, reject) => {
         const query = 
         {
           cypher: `UNWIND $relationships as rel
-                   MATCH (n1 { id: rel.fromNodeId }),(n2 { id: rel.toNodeId })
+                   MATCH (n1:Domain { nodeId: rel.fromNodeId }),(n2:Domain { nodeId: rel.toNodeId })
                    MERGE (n1)-[r:HYPERLINK_TO]->(n2)
                    RETURN r`,
           label: `insert ${hyperlinksToInsert.length} hyperlink relationships`,
@@ -192,7 +193,7 @@ module.exports = (dbHostName) => {
         const fields = record._fields[0];
         const properties = fields.properties;
         const node = {
-          id: fields.identity.low
+          nodeId: properties.nodeId
         };
         if (properties.domainName) {
           node.domainName = properties.domainName;
