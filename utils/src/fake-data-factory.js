@@ -64,7 +64,7 @@ module.exports = () => {
         const ipAddress = this.buildIpAddressFromIndex(i);
         result.ipAddresses.push(ipAddress);
       }
-      for (var i = 0; i < numberOfDomains; i++) {
+      for (var i = numberOfIps; i < numberOfDomains + numberOfIps; i++) {
         const domainName = this.buildDomainName(i);
         result.domains.push(domainName);
       }
@@ -75,10 +75,8 @@ module.exports = () => {
     buildRelationship(fromNode, toNode, relationshipType) {
       return { 
         relationshipType: relationshipType,
-        fromDomainId: fromNode.nodeType === 'DOMAIN' ? fromNode.id : '',
-        toDomainId: toNode.nodeType === 'DOMAIN' ? toNode.id : '',
-        toIPAddressId: toNode.nodeType === 'IP_ADDRESS' ? toNode.id : '',
-        fromIPAddressId: fromNode.nodeType === 'IP_ADDRESS' ? fromNode.id : ''
+        fromNodeId: fromNode.id,
+        toNodeId: toNode.id
       };
     },
 

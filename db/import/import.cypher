@@ -10,22 +10,22 @@ CREATE CONSTRAINT ON (ipAddress:IPAddress) ASSERT ipAddress.tempId IS UNIQUE;
 
 USING PERIODIC COMMIT 500
 LOAD CSV WITH HEADERS FROM "file:///data/hyperlinks.csv" AS csvLine
-MATCH (fromNode:Domain {tempId: toInt(csvLine.fromDomainId)}),(toNode:Domain {tempId: toInt(csvLine.toDomainId)})
+MATCH (fromNode:Domain {tempId: toInt(csvLine.fromNodeId)}),(toNode:Domain {tempId: toInt(csvLine.toNodeId)})
 CREATE (fromNode)-[:HYPERLINK_TO]->(toNode);
 
 USING PERIODIC COMMIT 500
 LOAD CSV WITH HEADERS FROM "file:///data/hyperlinks.csv" AS csvLine
-MATCH (fromNode:IPAddress {tempId: toInt(csvLine.fromDomainId)}),(toNode:Domain {tempId: toInt(csvLine.toIPAddressId)})
+MATCH (fromNode:IPAddress {tempId: toInt(csvLine.fromNodeId)}),(toNode:Domain {tempId: toInt(csvLine.toNodeId)})
 CREATE (fromNode)-[:HYPERLINK_TO]->(toNode);
 
 USING PERIODIC COMMIT 500
 LOAD CSV WITH HEADERS FROM "file:///data/hyperlinks.csv" AS csvLine
-MATCH (fromNode:IPAddress {tempId: toInt(csvLine.fromIPAddressId)}),(toNode:IPAddress {tempId: toInt(csvLine.toIPAddressId)})
+MATCH (fromNode:IPAddress {tempId: toInt(csvLine.fromNodeId)}),(toNode:IPAddress {tempId: toInt(csvLine.toNodeId)})
 CREATE (fromNode)-[:HYPERLINK_TO]->(toNode);
 
 USING PERIODIC COMMIT 500
 LOAD CSV WITH HEADERS FROM "file:///data/hyperlinks.csv" AS csvLine
-MATCH (fromNode:IPAddress {tempId: toInt(csvLine.fromIPAddressId)}),(toNode:Domain {tempId: toInt(csvLine.toDomainId)})
+MATCH (fromNode:Domain {tempId: toInt(csvLine.fromNodeId)}),(toNode:IPAddress {tempId: toInt(csvLine.toNodeId)})
 CREATE (fromNode)-[:HYPERLINK_TO]->(toNode);
 
 MATCH (n) REMOVE n.tempId;
