@@ -122,6 +122,33 @@ module.exports = (dbHostName) => {
         });
       });
     },
+    
+    /*
+    hyperlinksToInsert
+    {
+      fromId: 1,
+      toId: 2
+    }
+    */
+    insertHyperlinks (hyperlinksToInsert) {
+      return new Promise((resolve, reject) => {
+        const query = 
+        {
+          cypher: `UNWIND $rels as rel
+                   MATCH (n1 { id: rel.fromId }),(n2 { id: toId })
+                   MERGE (n1)-[r:HYPERLINK_TO]->(n2)
+                   RETURN r`,
+          label: `insert ${hyperlinksToInsert.length} hyperlink relationships`,
+          params: { rels: hyperlinksToInsert },
+          converter: (results) => {
+            console.log(results);
+          }
+        };
+        this.runQuery(query, (convertedResults) => {
+          resolve(convertedResults);
+        });
+      });
+    },
 
     getAllNodes() {
       return new Promise((resolve, reject) => {
