@@ -126,22 +126,22 @@ module.exports = (dbHostName) => {
     /*
     hyperlinksToInsert
     {
-      fromId: 1,
-      toId: 2
+      fromNodeId: 1,
+      toNodeId: 2
     }
     */
     insertHyperlinks (hyperlinksToInsert) {
       return new Promise((resolve, reject) => {
         const query = 
         {
-          cypher: `UNWIND $rels as rel
-                   MATCH (n1 { id: rel.fromId }),(n2 { id: toId })
+          cypher: `UNWIND $relationships as rel
+                   MATCH (n1 { id: rel.fromNodeId }),(n2 { id: rel.toNodeId })
                    MERGE (n1)-[r:HYPERLINK_TO]->(n2)
                    RETURN r`,
           label: `insert ${hyperlinksToInsert.length} hyperlink relationships`,
-          params: { rels: hyperlinksToInsert },
+          params: { relationships: hyperlinksToInsert },
           converter: (results) => {
-            console.log(results);
+            return results;
           }
         };
         this.runQuery(query, (convertedResults) => {

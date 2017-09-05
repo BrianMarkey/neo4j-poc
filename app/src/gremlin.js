@@ -51,8 +51,11 @@ module.exports = (dataSource, fakeDataFactory) => {
                 fakeDataFactory.creatRelationshipsForNode(node, allNodes, numberOfRelationships, 'HYPERLINK_TO')
               );
             });
-            console.log(newRelationships.slice(0,10));
+            const insertHyperlinksPromise = dataSource.insertHyperlinks(newRelationships);
             // insert relationships
+            insertHyperlinksPromise.then((results) => {
+              console.log(results);
+            })
           }, (err) => {
             console.log(err);
           });

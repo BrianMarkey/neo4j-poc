@@ -1,5 +1,5 @@
 FROM node:8.4
-COPY ./app/src /app/src
-COPY ./utils/src /utils/src
-COPY ./app/package.json ./app
+COPY ./app /app
+COPY ./utils /utils
 RUN npm install --prefix /app
+RUN npm install --prefix /utils

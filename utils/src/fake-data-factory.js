@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const wordlist = JSON.parse(fs.readFileSync(path.join(__dirname, 'words.json')));
+const uuidv1 = require('uuid/v1');
 
 module.exports = () => {
   return {
@@ -61,11 +62,11 @@ module.exports = () => {
         domains: []
       }
       for (var i = 0; i < numberOfIps; i++) {
-        const ipAddress = this.buildIpAddressFromIndex(i);
+        const ipAddress = this.buildIpAddress();
         result.ipAddresses.push(ipAddress);
       }
-      for (var i = numberOfIps; i < numberOfDomains + numberOfIps; i++) {
-        const domainName = this.buildDomainName(i);
+      for (var i = 0; i < numberOfDomains; i++) {
+        const domainName = this.buildDomainName();
         result.domains.push(domainName);
       }
 
@@ -75,32 +76,32 @@ module.exports = () => {
     buildRelationship(fromNode, toNode, relationshipType) {
       return { 
         relationshipType: relationshipType,
-        fromNodeId: fromNode.id,
-        toNodeId: toNode.id
+        fromNodeId: fromNode.nodeId,
+        toNodeId: toNode.nodeId
       };
     },
 
-    buildDomainName(tempId)
+    buildDomainName()
     {
       const segment1 = this.wordlist[this.getRandomIntFromRange(0, this.wordlist.length -1)];
       const segment2 = this.wordlist[this.getRandomIntFromRange(0, this.wordlist.length -1)];
       const segment3 = this.wordlist[this.getRandomIntFromRange(0, this.wordlist.length -1)];
       var name = `${segment1}.${segment2}.${segment3}.com`;
       return {
-        id: tempId,
+        nodeId: uuidv1(),
         nodeType: 'DOMAIN',
         domainName: name
       };
     },
 
-    buildIpAddressFromIndex(index) {
+    buildIpAddress() {
       const firstOctet = this.getRandomIntFromRange(0, 255);
       const secondOctet = this.getRandomIntFromRange(0, 255);
       const thirdOctet = this.getRandomIntFromRange(0, 255);
       const fourthOctet = this.getRandomIntFromRange(0, 255);
       const ipAddressString = `${firstOctet}.${secondOctet}.${thirdOctet}.${fourthOctet}`;
       return {
-        id: index,
+        nodeId: uuidv1(),
         nodeType: 'IP_ADDRESS',
         ipAddress: ipAddressString
       };
