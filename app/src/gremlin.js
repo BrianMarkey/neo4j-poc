@@ -12,23 +12,27 @@ module.exports = (dataSource, fakeDataFactory) => {
     },
 
     deleteRandomEdges(percentToDelete, next) {
-      dataSource.getEdgesCount((result) => {
+      dataSource.getEdgesCount().then((result) => {
         const numberToDelete = Math.floor(result * percentToDelete);
-        dataSource.deleteRandomEdges(numberToDelete, next);
+        dataSource.deleteRandomEdges(numberToDelete).then(() => {
+          next();
+        });
       });
     },
 
     deleteRandomNodes(percentToDelete, next) {
-      dataSource.getNodesCount((result) => {
+      dataSource.getNodesCount().then((result) => {
         const numberToDelete = Math.floor(result * percentToDelete);
-        dataSource.deleteRandomNodes(numberToDelete, next);
+        dataSource.deleteRandomNodes(numberToDelete).then(() => {
+          next();
+        });
       });
     },
 
     addRandomData(percentToAdd, next) {
       // create random nodes
       // randomly link them to eachother and other db nodes
-      dataSource.getNodesCount((result) => {
+      dataSource.getNodesCount().then((result) => {
         const numberToAdd = Math.floor(result * percentToAdd);
         const numberOfIPs = fakeDataFactory.getRandomIntFromRange(0, numberToAdd);
         const numberOfDomains = numberToAdd - numberOfIPs;

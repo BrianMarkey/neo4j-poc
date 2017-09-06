@@ -41,61 +41,69 @@ module.exports = (dbHostName) => {
       return result;
     },
 
-    getNodesCount (next) {
-      const query =
-      {
-        cypher: `MATCH (n) RETURN COUNT(n)`,
-        label: `get nodes count`,
-        converter: this.convertToCount
-      };
-      
-      this.runQuery(query).then((convertedResults) => {
-        next(convertedResults);
-      });
-    },
-
-    getEdgesCount (next) {
-      const query =
-      {
-        cypher: `MATCH (n)-[rel]-(o) RETURN COUNT(rel)`,
-        label: `get edges count`,
-        converter: this.convertToCount
-      };
-      
-      this.runQuery(query).then((convertedResults) => {
-        next(convertedResults);
-      });
-    },
-
-    deleteRandomEdges (count, next) {
-      const query =
-      {
-        cypher: `MATCH (d)-[rel]-()
-        WITH rel, rand() AS number
-        ORDER by number
-        LIMIT ${count}
-        DELETE rel`,
-        label: `delete ${count} random edges`
-      };
-
-      this.runQuery(query).then((convertedResults) => {
-        next(convertedResults);
-      });
-    },
-
-    deleteRandomNodes (count, next) {
-      const query =
-      {
-        cypher: `MATCH (n)
-        WITH n, rand() AS number
-        ORDER by number
-        LIMIT ${count}
-        DETACH DELETE n`,
-        label: `delete ${count} random nodes`
-      };
+    getNodesCount () {
+      return new Promise((resolve, reject) => {
+        const query =
+        {
+          cypher: `MATCH (n) RETURN COUNT(n)`,
+          label: `get nodes count`,
+          converter: this.convertToCount
+        };
         
-      this.runQuery(query).then((convertedResults) => {
-        next(convertedResults);
+        this.runQuery(query).then((convertedResults) => {
+          resolve(convertedResults);
+        });
+      });
+    },
+
+    getEdgesCount () {
+      return new Promise((resolve, reject) => {
+        const query =
+        {
+          cypher: `MATCH (n)-[rel]-(o) RETURN COUNT(rel)`,
+          label: `get edges count`,
+          converter: this.convertToCount
+        };
+        
+        this.runQuery(query).then((convertedResults) => {
+          resolve(convertedResults);
+        });
+      });
+    },
+
+    deleteRandomEdges (count) {
+      return new Promise((resolve, reject) => {
+        const query =
+        {
+          cypher: `MATCH (d)-[rel]-()
+          WITH rel, rand() AS number
+          ORDER by number
+          LIMIT ${count}
+          DELETE rel`,
+          label: `delete ${count} random edges`
+        };
+
+        this.runQuery(query).then((convertedResults) => {
+          resolve(convertedResults);
+        });
+      });
+    },
+
+    deleteRandomNodes (count) {
+      return new Promise((resolve, reject) => {
+        const query =
+        {
+          cypher: `MATCH (n)
+          WITH n, rand() AS number
+          ORDER by number
+          LIMIT ${count}
+          DETACH DELETE n`,
+          label: `delete ${count} random nodes`
+        };
+          
+        this.runQuery(query).then((convertedResults) => {
+          resolve(convertedResults);
+        });
       });
     },
 
