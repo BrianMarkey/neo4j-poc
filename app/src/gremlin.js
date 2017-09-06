@@ -2,34 +2,26 @@
 module.exports = (dataSource, fakeDataFactory) => {
   return {
     causeTrouble() {
-      this.deleteRandomEdges(.001, () => { 
-        this.deleteRandomNodes(.001, () => {
-          this.addRandomData(.001, () => {
-            this.causeTrouble();
-          });
-        });
-      });
+      this.deleteRandomEdges(.001);
+      this.deleteRandomNodes(.001);
+      this.addRandomData(.001);
     },
 
-    deleteRandomEdges(percentToDelete, next) {
+    deleteRandomEdges(percentToDelete) {
       dataSource.getEdgesCount().then((result) => {
         const numberToDelete = Math.floor(result * percentToDelete);
-        dataSource.deleteRandomEdges(numberToDelete).then(() => {
-          next();
-        });
+        dataSource.deleteRandomEdges(numberToDelete);
       });
     },
 
-    deleteRandomNodes(percentToDelete, next) {
+    deleteRandomNodes(percentToDelete) {
       dataSource.getNodesCount().then((result) => {
         const numberToDelete = Math.floor(result * percentToDelete);
-        dataSource.deleteRandomNodes(numberToDelete).then(() => {
-          next();
-        });
+        dataSource.deleteRandomNodes(numberToDelete);
       });
     },
 
-    addRandomData(percentToAdd, next) {
+    addRandomData(percentToAdd) {
       // create random nodes
       // randomly link them to eachother and other db nodes
       dataSource.getNodesCount().then((result) => {
@@ -55,9 +47,7 @@ module.exports = (dataSource, fakeDataFactory) => {
               );
             });
             // insert relationships
-            dataSource.insertHyperlinks(newRelationships).then((results) => {
-              next();
-            })
+            dataSource.insertHyperlinks(newRelationships);
           }, (err) => {
             console.log(err);
           });
