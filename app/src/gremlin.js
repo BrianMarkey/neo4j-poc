@@ -39,9 +39,8 @@ module.exports = (dataSource, fakeDataFactory) => {
         // wait for both results
         Promise.all([ipAddressesPromise, domainsPromise]).then(createNodesResult => {
           const createdNodes = createNodesResult[0].concat(createNodesResult[1]);
-          const getAllNodesPromise = dataSource.getAllNodes();
           //get all nodes
-          getAllNodesPromise.then((allNodes) => {
+          dataSource.getAllNodes().then((allNodes) => {
             var newRelationships = [];
             // loop through the results ids
             createdNodes.forEach((node) => {
@@ -51,9 +50,8 @@ module.exports = (dataSource, fakeDataFactory) => {
                 fakeDataFactory.creatRelationshipsForNode(node, allNodes, numberOfRelationships, 'HYPERLINK_TO')
               );
             });
-            const insertHyperlinksPromise = dataSource.insertHyperlinks(newRelationships);
             // insert relationships
-            insertHyperlinksPromise.then((results) => {
+            dataSource.insertHyperlinks(newRelationships).then((results) => {
               next();
             })
           }, (err) => {
