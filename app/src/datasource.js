@@ -136,9 +136,30 @@ module.exports = (dbHostName) => {
         const query = 
         {
           cypher: `UNWIND $relationships as rel
-                   MATCH (n1:Domain { nodeId: rel.fromNodeId }),(n2:Domain { nodeId: rel.toNodeId })
-                   MERGE (n1)-[r:HYPERLINK_TO]->(n2)
-                   RETURN r`,
+                    optional MATCH (n1:IPAddress)
+                    WHERE n1.nodeId = rel.fromNodeId
+                    WITH rel as rel, collect({fromNode:n1, toNode: null}) as l1
+                    
+                    //unwind [{fromNodeId: 'a7aaa5b3-925a-11e7-9853-c36afa2cfe0a', toNodeId: 'a7c29c4f-925a-11e7-9853-c36afa2cfe0a'}] as rel
+                    optional MATCH (n1:Domain)
+                    WHERE n1.nodeId = rel.fromNodeId
+                    WITH rel as rel, collect({fromNode:n1, toNode: null}) + l1 as l2
+                    
+                    //unwind [{fromNodeId: 'a7aaa5b3-925a-11e7-9853-c36afa2cfe0a', toNodeId: 'a7c29c4f-925a-11e7-9853-c36afa2cfe0a'}] as rel
+                    optional MATCH (n1:IPAddress)
+                    WHERE n1.nodeId = rel.toNodeId
+                    WITH rel as rel, collect({fromNode:null, toNode: n1}) + l2 as l3
+                    
+                    //unwind [{fromNodeId: 'a7aaa5b3-925a-11e7-9853-c36afa2cfe0a', toNodeId: 'a7c29c4f-925a-11e7-9853-c36afa2cfe0a'}] as rel
+                    optional MATCH (n1:Domain)
+                    WHERE n1.nodeId = rel.toNodeId
+                    WITH rel as rel, collect({fromNode:null, toNode: n1}) + l3 as l4
+                    
+                    with extract(fn in filter(x IN l4 where x.fromNode IS NOT NULL) | fn.fromNode)[0] as fromNode,
+                    extract(fn in filter(x IN l4 where x.toNode IS NOT NULL) | fn.toNode)[0] as toNode
+                    
+                    MERGE (fromNode)-[r:HYPERLINK_TO]->(fromNode)
+                    RETURN r`,
           label: `insert ${hyperlinksToInsert.length} hyperlink relationships`,
           params: { relationships: hyperlinksToInsert },
           converter: (results) => {
