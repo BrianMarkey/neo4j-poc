@@ -2,7 +2,7 @@ const neo4j = require('neo4j-driver').v1;
 const queue = require('queue')();
 
 module.exports = (dbHostName) => {
-  queue.concurrency = 1;
+  queue.concurrency = 3;
   queue.autostart = true;
   queue.start();
   
