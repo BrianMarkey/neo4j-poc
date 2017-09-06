@@ -1,6 +1,11 @@
 const neo4j = require('neo4j-driver').v1;
+const queue = require('queue')();
 
 module.exports = (dbHostName) => {
+  queue.concurrency = 1;
+  queue.autostart = true;
+  queue.start();
+  
   return {
     convertToGraphJSON(records) {
       if (!Array.isArray(records)) {
@@ -49,8 +54,7 @@ module.exports = (dbHostName) => {
           label: `get nodes count`,
           converter: this.convertToCount
         };
-        
-        this.runQuery(query).then((convertedResults) => {
+        this.addQueryToQueue(query).then((convertedResults) => {
           resolve(convertedResults);
         });
       });
@@ -64,8 +68,7 @@ module.exports = (dbHostName) => {
           label: `get edges count`,
           converter: this.convertToCount
         };
-        
-        this.runQuery(query).then((convertedResults) => {
+        this.addQueryToQueue(query).then((convertedResults) => {
           resolve(convertedResults);
         });
       });
@@ -82,8 +85,7 @@ module.exports = (dbHostName) => {
           DELETE rel`,
           label: `delete ${count} random edges`
         };
-
-        this.runQuery(query).then((convertedResults) => {
+        this.addQueryToQueue(query).then((convertedResults) => {
           resolve(convertedResults);
         });
       });
@@ -100,8 +102,7 @@ module.exports = (dbHostName) => {
           DETACH DELETE n`,
           label: `delete ${count} random nodes`
         };
-          
-        this.runQuery(query).then((convertedResults) => {
+        this.addQueryToQueue(query).then((convertedResults) => {
           resolve(convertedResults);
         });
       });
@@ -118,7 +119,7 @@ module.exports = (dbHostName) => {
           params: { domainsParam: domainsToInsert },
           converter: this.convertToNodes
         };
-        this.runQuery(query).then((convertedResults) => {
+        this.addQueryToQueue(query).then((convertedResults) => {
           resolve(convertedResults);
         });
       });
@@ -135,7 +136,7 @@ module.exports = (dbHostName) => {
           params: { ipsParam: ipAddressesToInsert },
           converter: this.convertToNodes
         };
-        this.runQuery(query).then((convertedResults) => {
+        this.addQueryToQueue(query).then((convertedResults) => {
           resolve(convertedResults);
         });
       });
@@ -180,7 +181,7 @@ module.exports = (dbHostName) => {
             return results;
           }
         };
-        this.runQuery(query).then((convertedResults) => {
+        this.addQueryToQueue(query).then((convertedResults) => {
           resolve(convertedResults);
         });
       });
@@ -194,8 +195,19 @@ module.exports = (dbHostName) => {
           label: `get all nodes`,
           converter: this.convertToNodes
         };
-        this.runQuery(query).then((convertedResults) => {
+        this.addQueryToQueue(query).then((convertedResults) => {
           resolve(convertedResults);
+        });
+      });
+    },
+
+    addQueryToQueue(query) {
+      return new Promise((resolve, reject) => {
+        queue.push((cb) => {
+          this.runQuery(query).then((convertedResults) => {
+            resolve(convertedResults);
+            cb();
+          });
         });
       });
     },
