@@ -48,7 +48,10 @@ module.exports = (dbHostName) => {
         label: `get nodes count`,
         converter: this.convertToCount
       };
-      this.runQuery(query, next);
+      
+      this.runQuery(query).then((convertedResults) => {
+        next(convertedResults);
+      });
     },
 
     getEdgesCount (next) {
@@ -58,7 +61,10 @@ module.exports = (dbHostName) => {
         label: `get edges count`,
         converter: this.convertToCount
       };
-      this.runQuery(query, next);
+      
+      this.runQuery(query).then((convertedResults) => {
+        next(convertedResults);
+      });
     },
 
     deleteRandomEdges (count, next) {
@@ -72,7 +78,9 @@ module.exports = (dbHostName) => {
         label: `delete ${count} random edges`
       };
 
-      this.runQuery(query, next);
+      this.runQuery(query).then((convertedResults) => {
+        next(convertedResults);
+      });
     },
 
     deleteRandomNodes (count, next) {
@@ -86,7 +94,9 @@ module.exports = (dbHostName) => {
         label: `delete ${count} random nodes`
       };
         
-      this.runQuery(query, next);
+      this.runQuery(query).then((convertedResults) => {
+        next(convertedResults);
+      });
     },
 
     insertDomains (domainsToInsert) {
@@ -100,7 +110,7 @@ module.exports = (dbHostName) => {
           params: { domainsParam: domainsToInsert },
           converter: this.convertToNodes
         };
-        this.runQuery(query, (convertedResults) => {
+        this.runQuery(query).then((convertedResults) => {
           resolve(convertedResults);
         });
       });
@@ -117,7 +127,7 @@ module.exports = (dbHostName) => {
           params: { ipsParam: ipAddressesToInsert },
           converter: this.convertToNodes
         };
-        this.runQuery(query, (convertedResults) => {
+        this.runQuery(query).then((convertedResults) => {
           resolve(convertedResults);
         });
       });
@@ -162,7 +172,7 @@ module.exports = (dbHostName) => {
             return results;
           }
         };
-        this.runQuery(query, (convertedResults) => {
+        this.runQuery(query).then((convertedResults) => {
           resolve(convertedResults);
         });
       });
@@ -176,7 +186,7 @@ module.exports = (dbHostName) => {
           label: `get all nodes`,
           converter: this.convertToNodes
         };
-        this.runQuery(query, (convertedResults) => {
+        this.runQuery(query).then((convertedResults) => {
           resolve(convertedResults);
         });
       });
@@ -225,30 +235,30 @@ module.exports = (dbHostName) => {
       return results;
     },
 
-    runQuery (query, next) {
-      const driver = neo4j.driver(`bolt://${dbHostName}`, neo4j.auth.basic("neo4j", "123456"));
-      const session = driver.session();
-      console.log(`starting ${query.label} query`);
-      const start = Date.now();
-      session
-        .run(query.cypher, query.params)
-        .then((result) => {
-          const duration = Date.now() - start;
-          console.log(`${query.label} query completed in ${duration} ms.`);
-          session.close();
-          driver.close();
-          var convertedResults;
-          if (query.converter) {
-            convertedResults = query.converter(result.records);
-          }
-          if (next) {
-            next(convertedResults);
-          }
-        })
-        // TODO: pass along error.
-        .catch((error) => {
-          console.log(error);
-        });
+    runQuery (query) {
+      return new Promise((resolve, reject) => {
+        const driver = neo4j.driver(`bolt://${dbHostName}`, neo4j.auth.basic("neo4j", "123456"));
+        const session = driver.session();
+        console.log(`starting ${query.label} query`);
+        const start = Date.now();
+        session
+          .run(query.cypher, query.params)
+          .then((result) => {
+            const duration = Date.now() - start;
+            console.log(`${query.label} query completed in ${duration} ms.`);
+            session.close();
+            driver.close();
+            var convertedResults;
+            if (query.converter) {
+              convertedResults = query.converter(result.records);
+            }
+            resolve(convertedResults);
+          })
+          .catch((error) => {
+            console.log(error);
+            reject(error);
+          });
+      });
     }
   }
 }
