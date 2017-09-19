@@ -3,26 +3,32 @@ module.exports = (dbHostName) => {
   const api = require('./api');
   const queryRepository = require('./query-repository');
   const fakeDataFactory = require('../../utils/src/fake-data-factory')();
-  const dataSource = require('./datasource')(dbHostName, fakeDataFactory);
+  const dataConverter = require('./data-converter');
+  const dataSource = require('./datasource')(dbHostName, dataConverter);
   const gremlin = require('./gremlin')(dataSource, fakeDataFactory);
   const events = require('events'); 
   const bus = new events.EventEmitter();
   const websocketManager = require('./websocket-manager')(8080, bus);
   const sentinel = require('./sentinel')(queryRepository, dataSource, bus);
 
-  // Start deleting and adding data.
-  // setInterval(() => {
-  //   gremlin.causeTrouble();
-  // }, 5000);
+  // Wait for the database to becom available.
+  dataSource.waitForDB(30).then(() => {
 
-  // // Start watching for changes in query results.
-  // setInterval(() => {
-  //   sentinel.patrol();
-  // }, 2000);
+    // Start deleting and adding data.
+    setInterval(() => {
+      gremlin.causeTrouble();
+    }, 5000);
 
-  // // Start the express api.
-  // api.start(queryRepository, dataSource);
+    // Start watching for changes in query results.
+    setInterval(() => {
+      sentinel.patrol();
+    }, 2000);
 
-  
-  gremlin.causeTrouble();
-}
+    // Start the express api.
+    api.start(queryRepository, dataSource);
+
+  })
+  .catch(() => {
+    console.log('The database did not start within the timeout period. The app will not start.');
+  });
+};

@@ -1,79 +1,12 @@
 const neo4j = require('neo4j-driver').v1;
 const queue = require('queue')();
 
-module.exports = (dbHostName) => {
-  queue.concurrency = 3;
+module.exports = (dbHostName, dataConverter) => {
+  queue.concurrency = 1;
   queue.autostart = true;
   queue.start();
   
   return {
-    convertToGraphJSON(records) {
-      if (!Array.isArray(records)) {
-        console.log('not an array');
-        return {};
-      }
-
-      const result = {
-        nodes: [],
-        edges: []
-      };
-
-      const nodeIds = {};
-
-      records.forEach((record) => {
-        record._fields.forEach((field) => {
-          if (field.hasOwnProperty('end')) {
-            result.edges.push({
-              source: field.start.low,
-              target: field.end.low,
-              type: field.type
-            });
-          }
-          else {
-            if (!nodeIds[field.identity.low]) {
-              result.nodes.push({
-                id: field.identity.low,
-                label: field.labels[0],
-                name: field.properties.ipAddress
-                  ||field.properties.domainName
-              });
-              nodeIds[field.identity.low] = true;
-            }
-          }
-        });
-      });
-
-      return result;
-    },
-
-    getNodesCount () {
-      return new Promise((resolve, reject) => {
-        const query =
-        {
-          cypher: `MATCH (n) RETURN COUNT(n)`,
-          label: `get nodes count`,
-          converter: this.convertToCount
-        };
-        this.addQueryToQueue(query).then((convertedResults) => {
-          resolve(convertedResults);
-        });
-      });
-    },
-
-    getEdgesCount () {
-      return new Promise((resolve, reject) => {
-        const query =
-        {
-          cypher: `MATCH (n)-[rel]-(o) RETURN COUNT(rel)`,
-          label: `get edges count`,
-          converter: this.convertToCount
-        };
-        this.addQueryToQueue(query).then((convertedResults) => {
-          resolve(convertedResults);
-        });
-      });
-    },
-
     deleteRandomEdges (count) {
       return new Promise((resolve, reject) => {
         const query =
@@ -107,6 +40,48 @@ module.exports = (dbHostName) => {
         });
       });
     },
+    
+    getAllNodes() {
+      return new Promise((resolve, reject) => {
+        const query = 
+        {
+          cypher: `MATCH (n) RETURN n`,
+          label: `get all nodes`,
+          converter: dataConverter.convertToNodes
+        };
+        this.addQueryToQueue(query).then((convertedResults) => {
+          resolve(convertedResults);
+        });
+      });
+    },
+
+    getNodesCount () {
+      return new Promise((resolve, reject) => {
+        const query =
+        {
+          cypher: `MATCH (n) RETURN COUNT(n)`,
+          label: `get nodes count`,
+          converter: dataConverter.convertToCount
+        };
+        this.addQueryToQueue(query).then((convertedResults) => {
+          resolve(convertedResults);
+        });
+      });
+    },
+
+    getEdgesCount () {
+      return new Promise((resolve, reject) => {
+        const query =
+        {
+          cypher: `MATCH (n)-[rel]-(o) RETURN COUNT(rel)`,
+          label: `get edges count`,
+          converter: dataConverter.convertToCount
+        };
+        this.addQueryToQueue(query).then((convertedResults) => {
+          resolve(convertedResults);
+        });
+      });
+    },
 
     insertDomains (domainsToInsert) {
       return new Promise((resolve, reject) => {
@@ -117,7 +92,7 @@ module.exports = (dbHostName) => {
                   RETURN d`,
           label: `insert ${domainsToInsert.length} domains`,
           params: { domainsParam: domainsToInsert },
-          converter: this.convertToNodes
+          converter: dataConverter.convertToNodes
         };
         this.addQueryToQueue(query).then((convertedResults) => {
           resolve(convertedResults);
@@ -134,7 +109,7 @@ module.exports = (dbHostName) => {
                   RETURN i`,
           label: `insert ${ipAddressesToInsert.length} IPAddresses`,
           params: { ipsParam: ipAddressesToInsert },
-          converter: this.convertToNodes
+          converter: dataConverter.convertToNodes
         };
         this.addQueryToQueue(query).then((convertedResults) => {
           resolve(convertedResults);
@@ -187,20 +162,6 @@ module.exports = (dbHostName) => {
       });
     },
 
-    getAllNodes() {
-      return new Promise((resolve, reject) => {
-        const query = 
-        {
-          cypher: `MATCH (n) RETURN n`,
-          label: `get all nodes`,
-          converter: this.convertToNodes
-        };
-        this.addQueryToQueue(query).then((convertedResults) => {
-          resolve(convertedResults);
-        });
-      });
-    },
-
     addQueryToQueue(query) {
       return new Promise((resolve, reject) => {
         queue.push((cb) => {
@@ -212,47 +173,30 @@ module.exports = (dbHostName) => {
       });
     },
 
-    convertToCount(records) {
-      if (!Array.isArray(records)) {
-        return 0;
-      }
-      return records[0]._fields[0].low;
-    },
-    
-    convertToIds(records) {
-      if (!Array.isArray(records)) {
-        return [];
-      }
-      const results = [];
-      records.forEach((record) => {
-        results.push(record);
-        //results.push(record._fields[0].id.low);
+    waitForDB (timeoutSeconds) {
+      return new Promise((resolve, reject) => {
+        const start = Date.now();
+        const interval = setInterval (() => {
+          this.runQuery({
+            cypher: 'MATCH (n) RETURN n LIMIT 1',
+            label: 'ping'
+          })
+          .then(() => {
+            clearInterval(interval);
+            resolve();
+          })
+          .catch(() => {
+            if (Date.now() - start >  timeoutSeconds * 1000) {
+              console.log('Wait for database timeout elapsed.');
+              clearInterval(interval);
+              reject();
+            }
+            else {
+              console.log('The database is not available yet.');
+            }
+          });
+        }, 1000);
       });
-      return results;
-    },
-    
-    convertToNodes(records) {
-      if (!Array.isArray(records)) {
-        return [];
-      }
-      const results = [];
-      records.forEach((record) => {
-        const fields = record._fields[0];
-        const properties = fields.properties;
-        const node = {
-          nodeId: properties.nodeId
-        };
-        if (properties.domainName) {
-          node.domainName = properties.domainName;
-          node.nodeType = 'DOMAIN';
-        }
-        else {
-          node.ipAddress = properties.ipAddress;
-          node.nodeType = 'IP_ADDRESS';
-        }
-        results.push(node);
-      });
-      return results;
     },
 
     runQuery (query) {
