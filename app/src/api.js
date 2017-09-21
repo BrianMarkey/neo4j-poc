@@ -3,11 +3,9 @@ const app = express();
 const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
 const bodyParser = require('body-parser');
-const dataConverter = require('./data-converter');
-const queryFactory = require('./query-factory')(dataConverter);
 
 module.exports = {
-  start(queryRepository, dataSource) {
+  start(queryRepository, dataSource, queryFactory) {
     var options = {
       swaggerDefinition: {
         info: {

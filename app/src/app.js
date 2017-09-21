@@ -26,7 +26,7 @@ module.exports = (dbHostName) => {
     }, 2000);
 
     // Start the express api.
-    api.start(queryRepository, dataSource);
+    api.start(queryRepository, dataSource, queryFactory);
 
   })
   .catch(() => {
