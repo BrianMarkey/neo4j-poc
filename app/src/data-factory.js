@@ -41,7 +41,7 @@ module.exports = () => {
     creatRelationshipsForNode(fromNode, otherNodes, count, type) {
       const result = [];
       for (var i = 0; i < count; i++) {
-        // TODO prevent linking the same node
+        // TODO: Prevent linking the same node
         const nodeIndex = this.getRandomIntFromRange(0, otherNodes.length - 1);
         result.push(this.buildRelationship(fromNode, otherNodes[nodeIndex], type));
       }

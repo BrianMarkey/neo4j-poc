@@ -18,7 +18,7 @@ const assert = require('assert');
         idResult: 'init'
       }
 
-      // mock query repository
+      // Mock the query repository.
       const queryRepository = {
         queries: [{
           id: '1',
@@ -29,7 +29,7 @@ const assert = require('assert');
         }]
       };
 
-      // mock data source
+      // Mock data source.
       const dataSource = {
         addQueryToQueue(query) {
           return new Promise((resolve, reject) => {

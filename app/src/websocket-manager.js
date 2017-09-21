@@ -9,7 +9,7 @@ module.exports = (port, bus) => {
       try {
         jsonData = JSON.parse(data);
       } catch(err) {
-        // Tell the client what to do
+        // Tell the client what to do.
         const errorResult = {
           message: 'I only speak JSON. ex: {"action": "SUBSCRIBE_TO_QUERY", "queryId": 1}'
         }
@@ -38,7 +38,7 @@ module.exports = (port, bus) => {
       return;
 
     Object.keys(subscriptionsForQuery).forEach((key) =>{
-      // todo check socket status
+      // TODO: check socket status.
       subscriptionsForQuery[key].send(JSON.stringify(deltas));
     });
   });
