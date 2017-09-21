@@ -1,5 +1,5 @@
 // The purpose of this module is to randomly add and delete data.
-module.exports = (dataSource, fakeDataFactory) => {
+module.exports = (dataSource, fakeDataFactory, queryFactory) => {
   return {
     causeTrouble() {
       this.deleteRandomEdges(.001);
@@ -8,35 +8,48 @@ module.exports = (dataSource, fakeDataFactory) => {
     },
 
     deleteRandomEdges(percentToDelete) {
-      dataSource.getEdgesCount().then((result) => {
+      // get the total number of edges
+      const getEdgesCountQuery = queryFactory.buildGetEdgesCountQuery();
+      dataSource.addQueryToQueue(getEdgesCountQuery).then((result) => {
+        /// delete a percentage of them
         const numberToDelete = Math.floor(result * percentToDelete);
-        dataSource.deleteRandomEdges(numberToDelete);
+        const deleteEdgesQuery = queryFactory.buildDeleteRandomEdgesQuery(numberToDelete);
+        dataSource.addQueryToQueue(deleteEdgesQuery);
       });
     },
 
     deleteRandomNodes(percentToDelete) {
-      dataSource.getNodesCount().then((result) => {
+      // get the total number of nodes
+      const getNodesCountQuery = queryFactory.buildGetNodesCountQuery();
+      dataSource.addQueryToQueue(getNodesCountQuery).then((result) => {
+        /// delete a percentage of them
         const numberToDelete = Math.floor(result * percentToDelete);
-        dataSource.deleteRandomNodes(numberToDelete);
+        const deleteNodesQuery = queryFactory.buildDeleteRandomNodesQuery(numberToDelete);
+        dataSource.addQueryToQueue(deleteNodesQuery);
       });
     },
 
     addRandomData(percentToAdd) {
       // create random nodes
       // randomly link them to eachother and other db nodes
-      dataSource.getNodesCount().then((result) => {
+      const getNodesCountQuery = queryFactory.buildGetNodesCountQuery();
+      dataSource.addQueryToQueue(getNodesCountQuery).then((result) => {
         const numberToAdd = Math.floor(result * percentToAdd);
         const numberOfIPs = fakeDataFactory.getRandomIntFromRange(0, numberToAdd);
         const numberOfDomains = numberToAdd - numberOfIPs;
         const nodesToAdd = fakeDataFactory.createNodes(numberOfIPs, numberOfDomains);
+        // build the queries to insert the nodes
+        const insertIPAddressesQuery = queryFactory.buildInsertIPAddressesQuery(nodesToAdd.ipAddresses);
+        const insertDomainsQuery = queryFactory.buildInsertDomainsQuery(nodesToAdd.domains);
         // insert the nodes
-        const ipAddressesPromise = dataSource.insertIPAddresses(nodesToAdd.ipAddresses);
-        const domainsPromise = dataSource.insertDomains(nodesToAdd.domains);
+        const ipAddressesPromise = dataSource.addQueryToQueue(insertIPAddressesQuery);
+        const domainsPromise = dataSource.addQueryToQueue(insertDomainsQuery);
         // wait for both results
         Promise.all([ipAddressesPromise, domainsPromise]).then(createNodesResult => {
           const createdNodes = createNodesResult[0].concat(createNodesResult[1]);
           //get all nodes
-          dataSource.getAllNodes().then((allNodes) => {
+          const getAllNodesQuery = queryFactory.buildGetAllNodesQuery();
+          dataSource.addQueryToQueue(getAllNodesQuery).then((allNodes) => {
             var newRelationships = [];
             // loop through the results ids
             createdNodes.forEach((node) => {
@@ -47,7 +60,8 @@ module.exports = (dataSource, fakeDataFactory) => {
               );
             });
             // insert relationships
-            dataSource.insertHyperlinks(newRelationships);
+            const insertHyperlinksQuery = queryFactory.buildInsertHyperlinksQuery(newRelationships);
+            dataSource.addQueryToQueue(insertHyperlinksQuery);
           }, (err) => {
             console.log(err);
           });

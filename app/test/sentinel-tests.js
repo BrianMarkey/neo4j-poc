@@ -6,17 +6,19 @@ const assert = require('assert');
   describe('#patrol()', function() {
     it('should emit an event with the correct data when deltas are found.', function() {
       // Arrange
-      var eventNameResult = '';
       var idResult = '';
-      var deltasResult = { };
+      var eventNameResult = '';
+      var deltasResult = {};
       const bus = {
         emit (name, id, deltas) {
           eventNameResult = name;
           idResult = id;
           deltasResult  = deltas;
-        }
+        },
+        idResult: 'init'
       }
 
+      // mock query repository
       const queryRepository = {
         queries: [{
           id: '1',
@@ -27,26 +29,30 @@ const assert = require('assert');
         }]
       };
 
+      // mock data source
       const dataSource = {
-        runQuery(query, next) {
-          if (query.id === '1') {
-            next({
-              nodes: [ { id: 1 }, { id: 2 }, { id: 3 } ],
-              edges: [ { id: 1 }, { id: 2 } ]
-            });
-          }
+        addQueryToQueue(query) {
+          return new Promise((resolve, reject) => {
+            if (query.id === '1') {
+              resolve({
+                nodes: [ { id: 1 }, { id: 2 }, { id: 3 } ],
+                edges: [ { id: 1 }, { id: 2 } ]
+              });
+            }
+          });
         }
       };
 
       const testSentinel = sentinel(queryRepository, dataSource, bus);
 
       // Act
-      const result = testSentinel.patrol();
+      testSentinel.patrol().then(() => {
+        // Assert
+        assert.strictEqual('query_ResultsChanged', bus.eventNameResult);
+        assert.strictEqual('1', idResult);
+        assert.strictEqual(1, deltasResult.removedEdges.length);
+      });
 
-      // Assert
-      assert.strictEqual(eventNameResult, 'query_ResultsChanged');
-      assert.strictEqual(1, deltasResult.removedEdges.length);
-      assert.strictEqual('1', idResult);
     });
     
     it('should not emit an event when no deltas are found.', function() {
@@ -73,23 +79,26 @@ const assert = require('assert');
       };
 
       const dataSource = {
-        runQuery(query, next) {
-          if (query.id === '1') {
-            next({
-              nodes: [ { id: 1 }, { id: 2 }, { id: 3 } ],
-              edges: [ { id: 1 }, { id: 2 }, { id: 3 } ]
-            });
-          }
+        addQueryToQueue(query, next) {
+          return new Promise((resolve, reject) => {
+            if (query.id === '1') {
+              next({
+                nodes: [ { id: 1 }, { id: 2 }, { id: 3 } ],
+                edges: [ { id: 1 }, { id: 2 }, { id: 3 } ]
+              });
+              
+            }
+          });
         }
       };
       
       const testSentinel = sentinel(queryRepository, dataSource, bus);
-
+      
       // Act
-      const result = testSentinel.patrol();
-
-      // Assert
-      assert.strictEqual(eventNameResult, '');
+      testSentinel.patrol().then(() => {
+        // Assert
+        assert.strictEqual('', eventNameResult);
+      });
     });
   });
 

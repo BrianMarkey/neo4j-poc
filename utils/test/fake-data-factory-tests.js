@@ -99,23 +99,6 @@ const fakeDataFactory = require('../src/fake-data-factory.js')();
       assert.strictEqual(numberOfIPs, result.ipAddresses.length);
     });
   });
-  
-  describe('#buildRelationship()', function() {
-    it('should set the relationship from property name to domainId when the from node is a domain.', function() {
-      const node1 = {
-        id: 1,
-        nodeType: 'DOMAIN',
-        domainName: 'testdomain'
-      };
-      const node2 = {
-        id: 2,
-        nodeType: 'IP_ADDRESS',
-        ipAddress: '1.1.1.1'
-      };
-      const hyperLink = fakeDataFactory.buildRelationship(node1, node2, 'HYPERLINK_TO');
-      assert(hyperLink.hasOwnProperty('fromDomainId'));
-    });
-  });
 
   describe('#getRandomIpAddress()', function() {
     it('should create a valid ip address.', function() {

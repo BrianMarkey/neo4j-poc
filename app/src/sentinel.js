@@ -4,14 +4,32 @@
 module.exports = (queryRepository, dataSource, bus) => {
   return {
     patrol() {
-      queryRepository.queries.forEach((query) => {
-        dataSource.runQuery(query, (results) => {
-          const deltas = this.getDeltas(query.results, results);
-          if (deltas) {
-            bus.emit('query_ResultsChanged', query.id, deltas);
-            query.results = results;
-          }
+      return new Promise((resolve, reject) => {
+        // Loop through all of the stored queries.
+        const queryPromises = [];
+        queryRepository.queries.forEach((query) => {
+          const queryPromise =
+            // Get the results of the query.
+            dataSource.addQueryToQueue(query)
+            .then((results) => {
+              // See if the results have changed.
+              const deltas = this.getDeltas(query.results, results);
+              if (deltas) {
+                // If there are changes, published them to the bus.
+                bus.emit('query_ResultsChanged', query.id, deltas);
+                query.results = results;
+              }
+            });
+          queryPromises.push(queryPromise);
         });
+        // Wait for the child promises to resolve.
+        Promise.all(queryPromises)
+          .then(() => {
+            resolve();
+          })
+          .catch((error) =>{
+            reject(error);
+          });
       });
     },
     getDeltas(oldSet, newSet) {

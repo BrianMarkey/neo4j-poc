@@ -4,8 +4,9 @@ module.exports = (dbHostName) => {
   const queryRepository = require('./query-repository');
   const fakeDataFactory = require('../../utils/src/fake-data-factory')();
   const dataConverter = require('./data-converter');
-  const dataSource = require('./datasource')(dbHostName, dataConverter);
-  const gremlin = require('./gremlin')(dataSource, fakeDataFactory);
+  const queryFactory = require('./query-factory')(dataConverter);
+  const dataSource = require('./datasource')(dbHostName, queryFactory);
+  const gremlin = require('./gremlin')(dataSource, fakeDataFactory, queryFactory);
   const events = require('events'); 
   const bus = new events.EventEmitter();
   const websocketManager = require('./websocket-manager')(8080, bus);

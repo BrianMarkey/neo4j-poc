@@ -1,4 +1,4 @@
-const queryFactory = require('../src/query-factory.js');
+const queryFactory = require('../src/query-factory.js')({});
 const assert = require('assert');
 
  describe('queryFactory', function() {

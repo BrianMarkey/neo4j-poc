@@ -3,7 +3,8 @@ const app = express();
 const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
 const bodyParser = require('body-parser');
-const queryFactory = require('./query-factory');
+const dataConverter = require('./data-converter');
+const queryFactory = require('./query-factory')(dataConverter);
 
 module.exports = {
   start(queryRepository, dataSource) {
@@ -72,7 +73,8 @@ module.exports = {
         }
         else {
           const query = queryFactory.buildHyperlinkQuery(req.body, dataSource.convertToGraphJSON);
-          dataSource.runQuery(query, (result) => {
+          dataSource.addQueryToQueue(query)
+          .then((result) => {
             // Update the query with the results.
             query.results = result;
             // Save the query for monitoring.
