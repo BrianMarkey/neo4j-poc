@@ -1,3 +1,5 @@
+// This module defines the HTTP api used to get
+// and create observable queries.
 const express = require('express');
 const app = express();
 const path = require('path');
@@ -6,6 +8,7 @@ const bodyParser = require('body-parser');
 
 module.exports = {
   start(queryRepository, dataSource, queryFactory) {
+    // Set up the swagger documentation.
     var options = {
       swaggerDefinition: {
         info: {
@@ -21,6 +24,7 @@ module.exports = {
 
     var swaggerSpec = swaggerJSDoc(options);
 
+    // Configure express.
     app.use(bodyParser.json());  
     app.use(express.static(path.join(__dirname, 'static')));
 
@@ -84,6 +88,7 @@ module.exports = {
       });
     });
 
+    // Start the API.
     app.listen(3000, function () {
       console.log('API up on port 3000.');
     });
@@ -93,19 +98,24 @@ module.exports = {
       var result = {
         errors: []
       };
-      console.log(req.body);
+      // Make sure there is something in the body.
       if (!req.body || Object.keys(req.body).length === 0) {
          result.errors.push('A request body in a valid JSON format is required.');
       }
       else {
+        // Make sure a label was provided.
         if (!req.body.label) {
           result.errors.push('A label is required');
         }
+        // Make sure the start node type is one of the
+        // enumerated values.
         if (typeof(req.body.startNodeType) !== 'undefined'
             && req.body.startNodeType !== 'DOMAIN'
             && req.body.startNodeType !== 'HYPERLINK') {
           result.errors.push(`Invalid startNodeType: '${req.body.startNodeType}'`);
         }
+        // Make sure that the degrees of separation value is
+        // an int in the specified range.
         if (typeof(req.body.degreesOfSeparation) !== 'undefined') {
           const intValue = parseInt(req.body.degreesOfSeparation);
           if (!intValue)
@@ -113,6 +123,8 @@ module.exports = {
           else if (intValue > 5 || intValue < 1)
             result.errors.push('degreesOfSeparation must be between 1 and 5.');
         }
+        // Make sure that the response limit value is
+        // an int in the specified range.
         if (typeof(req.body.responseLimit) !== 'undefined') {
           const intValue = parseInt(req.body.responseLimit);
           if (!intValue)

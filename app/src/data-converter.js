@@ -1,7 +1,14 @@
+// This module defines methods for transforming
+// data retruned from the neo4j javascript driver
+// into objects which are easily used by the application.
 module.exports = {
+  // Converts data to the GraphJSON format
+  // {
+  //   nodes: [...],
+  //   edges: [...] 
+  // }
   convertToGraphJSON(records) {
     if (!Array.isArray(records)) {
-      console.log('not an array');
       return {};
     }
 
@@ -37,13 +44,19 @@ module.exports = {
 
     return result;
   },
+
+  // Converts a result set from a query
+  // returning a count to an it representing the count. 
   convertToCount(records) {
     if (!Array.isArray(records)) {
       return 0;
     }
+    // TODO: More validation.
+    // TODO: parseInt.
     return records[0]._fields[0].low;
   },
   
+  // TODO: Delete this. Doesn't appear to be used.
   convertToIds(records) {
     if (!Array.isArray(records)) {
       return [];
@@ -56,6 +69,9 @@ module.exports = {
     return results;
   },
   
+  // Extracts and returns the nodes from
+  // a result set in a single array. Any selected
+  // data about the node will be included.
   convertToNodes(records) {
     if (!Array.isArray(records)) {
       return [];

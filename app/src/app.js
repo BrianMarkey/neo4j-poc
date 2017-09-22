@@ -1,3 +1,7 @@
+// This module acts as the composition root
+// for the server-side application.
+// It creates and injects the necessary components
+// and starts the processes.
 module.exports = (dbHostName) => {
   dbHostName = dbHostName || 'neo4j';
   const api = require('./api');
@@ -9,7 +13,6 @@ module.exports = (dbHostName) => {
   const gremlin = require('./gremlin')(dataSource, fakeDataFactory, queryFactory);
   const events = require('events'); 
   const bus = new events.EventEmitter();
-  const websocketManager = require('./websocket-manager')(8080, bus);
   const sentinel = require('./sentinel')(queryRepository, dataSource, bus);
 
   // Wait for the database to becom available.
@@ -27,6 +30,9 @@ module.exports = (dbHostName) => {
 
     // Start the express api.
     api.start(queryRepository, dataSource, queryFactory);
+
+    // Start the web socket manager.
+    require('./websocket-manager')(8080, bus);
 
   })
   .catch(() => {

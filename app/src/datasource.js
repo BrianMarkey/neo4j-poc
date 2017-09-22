@@ -1,3 +1,5 @@
+// This module defines methods for running queries
+// against a neo4j database.
 const neo4j = require('neo4j-driver').v1;
 const queue = require('queue')();
 
@@ -6,6 +8,7 @@ module.exports = (dbHostName, queryFactory) => {
   queue.autostart = true;
   queue.start();
   
+  // Run the provided query.
   const runQuery = (query) => {
     return new Promise((resolve, reject) => {
       const driver = neo4j.driver(`bolt://${dbHostName}`, neo4j.auth.basic("neo4j", "123456"));
@@ -33,6 +36,7 @@ module.exports = (dbHostName, queryFactory) => {
   }
 
   return {
+    // Queue the provided query to be run.
     addQueryToQueue(query) {
       return new Promise((resolve, reject) => {
         queue.push((cb) => {
@@ -44,7 +48,10 @@ module.exports = (dbHostName, queryFactory) => {
       });
     },
 
+    // Ping the database until it responds.
+    // Will stop pinging after the specified timeout.
     waitForDB (timeoutSeconds) {
+      // TODO: Default the timeoutSeconds.
       return new Promise((resolve, reject) => {
         const start = Date.now();
         const interval = setInterval (() => {
