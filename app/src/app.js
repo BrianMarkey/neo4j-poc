@@ -35,7 +35,8 @@ module.exports = (dbHostName) => {
     require('./websocket-manager')(8080, bus);
 
   })
-  .catch(() => {
+  .catch((error) => {
+    console.log(error);
     console.log('The database did not start within the timeout period. The app will not start.');
   });
 };

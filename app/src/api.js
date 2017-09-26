@@ -5,9 +5,10 @@ const app = express();
 const path = require('path');
 const swaggerJSDoc = require('swagger-jsdoc');
 const bodyParser = require('body-parser');
+const corsAllow = 'http://localhost:8181';
 
 module.exports = {
-  start(queryRepository, dataSource, queryFactory) {
+  start(queryRepository, dataSource, queryFactory, allowDomain) {
     // Set up the swagger documentation.
     var options = {
       swaggerDefinition: {
@@ -27,6 +28,12 @@ module.exports = {
     // Configure express.
     app.use(bodyParser.json());  
     app.use(express.static(path.join(__dirname, 'static')));
+    
+    app.use(function(req, res, next) {
+      res.header("Access-Control-Allow-Origin", corsAllow);
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+      next();
+    });
 
     app.get('/swagger.json', function(req, res) {
       res.json(swaggerSpec);
@@ -42,7 +49,7 @@ module.exports = {
      *     produces:
      *       - application/json
      *     parameters:
-     *       - label: name
+     *       - name: queryName
      *         description: the name of the query
      *         in: body
      *         required: true
@@ -67,9 +74,10 @@ module.exports = {
      *       400:
      *         description: The request body was invalid. The response body will contain the details.
      */
-    app.post('/hyperlinkQueries', function (req, res) {
+    app.post('/api/v1/hyperlinkQueries', function (req, res) {
       // Validate the request.
       validatePOSTHyperlinkQueryRequest(req, (validationResult) => {
+        console.log(req.body);
         if (validationResult.errors.length) {
           res.status(400).send(validationResult);
         }
@@ -103,9 +111,9 @@ module.exports = {
          result.errors.push('A request body in a valid JSON format is required.');
       }
       else {
-        // Make sure a label was provided.
-        if (!req.body.label) {
-          result.errors.push('A label is required');
+        // Make sure a queryName was provided.
+        if (!req.body.queryName) {
+          result.errors.push('A queryName is required');
         }
         // Make sure the start node type is one of the
         // enumerated values.

@@ -22,7 +22,7 @@ module.exports = (dataConverter) => {
         results: {
 
         },
-        label: requestBody.label,
+        label: requestBody.queryName,
         converter: dataConverter.convertToGraphJSON
       };
     },
