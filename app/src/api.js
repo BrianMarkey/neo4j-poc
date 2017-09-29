@@ -8,7 +8,7 @@ const bodyParser = require('body-parser');
 const corsAllow = 'http://localhost:8181';
 
 module.exports = {
-  start(queryRepository, dataSource, queryFactory, allowDomain) {
+  start(queryRepository, dataSource, queryFactory) {
     // Set up the swagger documentation.
     var options = {
       swaggerDefinition: {
