@@ -95,6 +95,49 @@ module.exports = {
         }
       });
     });
+    
+
+    /**
+     * @swagger
+     * /api/v1/hyperlinkQueries/{id}:
+     *   get:
+     *     tags:
+     *       - HyperlinkQuery
+     *     description: Gets an observable query of hyperlinks and their related nodes.
+     *     produces:
+     *       - application/json
+     *     parameters:
+     *       - name: id
+     *         description: the id of the query
+     *         in: path
+     *         required: true
+     *         type: string
+     *     responses:
+     *       200:
+     *         description: Success.
+     *       400:
+     *         description: The request was invalid. The response body will contain the details.
+     */
+    app.get('/api/v1/hyperlinkQueries/:id', function (req, res) {
+      // Validate the request.
+      if (typeof(req.params.id) === 'undefined' || req.params.id === '') {
+        res.status(400).json({error: `An id is required. ${req.params.id}`});
+      }
+      else {
+        queryRepository.get(req.params.id)
+          .then((query) => {
+            if (query) {
+              res.status(200).json(query);
+            }
+            else {
+              res.status(404).json({error: `No query found with the id ${req.params.id}`});
+            }
+          })
+          .catch((err) => {
+            res.status(500);
+          });
+      }
+    });
 
     // Start the API.
     app.listen(3000, function () {
