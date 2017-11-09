@@ -9,11 +9,12 @@ The goal is to create a group of applications which interact with a neo4j databa
 - Run a web socket server which will add the ability to subscribe to stored queries, and push any deltas as they occur.
 - Add an interface, which uses the api to save queries, displays them in a graph, then subscribes to them via the websocket server. When changes are pushed they will be reactively updated in the graph.
 
+### To build the docker images and seed the db:
 ```
-## Build
 make build
-
-## Run
+```
+### To run the conainers and start all apps:
+```
 make run
 ```
 The neo4j database browser will be available at http://localhost:7474/browser/
