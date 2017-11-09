@@ -18,5 +18,7 @@ make build
 make run
 ```
 The neo4j database browser will be available at http://localhost:7474/browser/
-Username neo4j
-Password 123456
+
+Username: neo4j
+
+Password: 123456
